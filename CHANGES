@@ -1,0 +1,847 @@
+=================================================
+2011-03-12: applied Roman's 6.5.0 Update 1 patch.
+=================================================
+
+LICENSE:
+     All patches are licensed under original Open CASCADE Public License
+
+
+
+
+ 
+fixes up to and including fix460 (included) are released as 6.5.0 Update 1
+=======================================================
+
+Fixes 106-460 have been ported to 6.5.0:
+- Fix315 and fix455 has been removed as it has been integrated into 6.5.0
+- Fix370 reworked to avoid creation of OSD_DataMapOfStringFunction and reuse of Plugin_MapOfFunctions. The
+  latter had to be made public class. This roll back allows to avoid overhead to support updated vcproj and
+  make files but also returns to duplication of Plugin_MapOfFunctions and Draw_MapOfFunctions.
+
+
+=======================================================
+
+fix460
+- Summary: TBB has to be disabled in BRepMesh due to data races.
+- Detailed description: On some shape configurations (e.g. shared subshapes) there are data races when computing points
+  on B-Splines. See detailed explanation in http://opencascade.blogspot.com/2010/05/open-cascade-and-multi-threading-again.html.
+  There are several options:
+  1. Remove TBB from BRepMesh - quick, easy but withdraws all advantages of multi-core support (which was a strong message of
+     the release)
+  2. Fix BRepMesh to traverse partner shapes without repetition. It will allow to compute triangulation only once.
+  3. Remove cache use in Geom/Geom2d_BSpline/Bezier Surface/Curve, or make it user parameter-based (off by default). This will
+     help avoid such data races in many other places. I think this can be the best option.
+- Dependency: none
+
+
+fix455
+- Summary: TKOpenGl uses hard-coded library names to FTGL library which do not match default names generated during the library build.
+- Detailed description: FTGL 2.1.2 required for OCC 6.4.1 produces default names ftgl_dynamic_MTD[_d].dll
+                        OCC uses _vcN suffix (e.g. _vc8, _vc9, _vc10) what breaks the build.
+                        Open CASCADE 6.5.0 fixes this issue
+- Dependency: none
+
+
+
+Starting with fix455 fixes are applied to Open CASCADE 6.4.2.
+Fixes 106-450 have been ported to 6.4.2:
+- Fix370 reworked to avoid creation of OSD_DataMapOfStringFunction and reuse of Plugin_MapOfFunctions. The
+  latter had to be made public class. This roll back allows to avoid overhead to support updated vcproj and
+  make files but also returns to duplication of Plugin_MapOfFunctions and Draw_MapOfFunctions.
+
+
+fixes till fix450 (included) released as 6.3.1 Update 8
+=======================================================
+
+fix450
+- Summary: XCAFDoc_ShapeTool extended with two methods - SetAutoNaming() and AutoNaming().
+- Detailed description: Auto-naming is used to auto-generate names for (sub-)shapes. Earlier it was
+                        controlled by a pre-processor macro (#define AUTONAMING), which was defined
+                        in source code. Thus, the XDE document was contaminated with names not
+                        present in the original imported files.
+                        The fix makes it a run-time parameter which is on by default, preserving previous
+                        behavior. Unfortunately, it had to be made a static member function as it is
+                        used by other static members.
+- Dependency: none
+
+fix445
+- Summary: IGESCAFControl_Writer extended with method Transfer() accepting TDF_LabelSequence and Write*() also accept TDF_LabelSequence
+- Detailed description: This API makes IGESCAFControl_Writer more consistent with STEPCAFControl_Writer
+                        and allows to export only sub-part of the XDE document (e.g. only root shapes
+                        belonging to one layer, etc).
+                        WriteNames() and WriteLayers() were not re-designed and they still iterate over
+                        entire document. However given that there are no resulting entities for shapes
+                        not referred to by TDF_LabelSequence, not affected layers and names will not be
+                        transferred.
+- Dependency: none
+
+fix440
+- Summary: XCAFDoc_LayerTool extended to work with layer defined by its label, not string
+- Detailed description: Added methods IsSet(), UnSetOneLayer(), GetLayers() that accept TDF_Label or
+                        TDF_LabelSequence in addition to TCollection_ExtendedString or
+                        TColStd_HSequenceOfExtendedString.
+                        These methods allow for better performance as avoid searching for the
+                        layer label using its string.
+- Dependency: none
+
+fix435
+- Summary: gp_Mat's constructors incompletely initilize memory when compiled by gcc 4.1.2 with -O2
+- Detailed description: gp_Mat constructors use indirect memory reference ((Standard_Real*)&matrix[0][0])[i])
+                        to access elements of the member field matrix[3][3]. Likely due to gcc bug this
+                        results in uninitialized memory and further crashes when using that garbage.
+                        See details at http://www.opencascade.org/org/forum/thread_19603/.
+                        gp_XYZ.lxx had to be fixed as well since it used the same macros defined in
+                        gp_Mat.lxx. Macros in gp_Mat.lxx could be removed too to avoid possible conflicts
+                        with user's code but currently left to minimize modifications.
+- Dependency: none
+
+fixes till fix430 (included) released as 6.3.1 Update 7
+=======================================================
+
+
+fix430
+- Summary: XCAFDoc_DocumentTool attributes are removed from internal map upon closing the XDE document
+- Detailed description: XCAFDoc_DocTool.cxx contains static map RootLDocLMap. Prior to the fix,
+                        when the document got closed this map would contain orphan pair
+                        {root, doc_lab}. When a new doc is created its rootlab might have the
+                        same LabNotePtr and hence the same hash function value. Therefore
+                        XCAFDoc_DocumentTool::DocLabel() considered the label has already been registered
+                        RootLDocLMap and returned a wrong label (instead of creating new). Further attempt
+                        to access that label threw an exception.
+                        Perhaps a better approach than storing a global map would be a simple tree node attribute
+                        hosted on a root label and pointing to a label holdng XCAFDoc_DocumentTool. This
+                        would be a reliable self-contained implementation.
+- Dependency: none
+
+fix425
+- Summary: Fixed data races in Poly
+- Detailed description: Removed static variables which were inappropriate.
+- Dependency: none
+
+fix420
+- Summary: Standard_Mutex on Windows partially rolled back to use original OCC6.3.1 code
+- Detailed description: This was done to measure performance of OCC memory allocator. This should not have any significant
+                        performance impact on CAD Exchanger but will be closer to original OCC code. Hopefully OCC team will
+                        accept previous modifications and will not busy-wait with the help of sleep().
+- Dependency: fix112
+
+fix415
+- Summary: Use of size_t types in NCollection_Vector instead of integer
+- Detailed description: This is more reliable for 64bit support and eliminates a lot of compilation warnings on MSVS2005 win32 (/Wp).
+- Dependency: None
+
+fix410
+- Summary: Visual Studio 2005/2008 for win64 are aligned with 6.3.1 Update 6
+- Detailed description: Modifications introduced into .vcproj for 32bit in earlier fixes must be ported to win64.
+- Dependency: None
+
+
+fixes till fix405 (included) released as 6.3.1 Update 6
+=======================================================
+
+fix405
+- Summary: Corrected processing of parameter read.iges.bspline.continuity set to 0 
+- Detailed description: When read.iges.bspline.continuity set to 0 (with Interface_Static::SetCVal()), the BSplineSurface
+	is not enforced to become periodic if it is closed what is done when it's set to 1. In some cases (e.g.
+        www.firstcadlibrary.com/seatmotor2.igs, entity 397) this leads to wrong resulting shape after Shape Healing. Instead
+	of added missing seam the face is split into a compound of 2 invalid faces.
+
+	NOTE: See comments in the code, for consistency between TransferSplineSurface() and TransferBSplineSurface() the
+	former must have a code to convert to periodic surfaces, and the latter - to IGESConvGeom for enforcing continuity.
+	It appeared that OCC IGES converter never enforced surface continuity though it was expected to. It is up to the OCC
+	team to verify if addition of these calls will not break regressions.
+
+- Dependency: None
+
+fix400
+- Summary: Fix uninitialized memory access issues 
+- Detailed description: The code compiled on Linux with gcc4.4.1 in release mode produced hang on GeomPlate algo while
+                        worked in debug mode. Analysis with Intel Parallel Inspector revealed several uninitialized memory
+                        access problems. This fix addresses them
+	- IntRes2d_Transition, _Domain; Intf_SectionPoint; Adapto3d_CurveOnSurface; Bnd_Box2d - initialization of all fields
+- Dependency: None
+
+fix395
+- Summary: A set of fixes to enable thread-safety
+- Detailed description:
+	- Plate_Plate now uses field members instead of static variables
+		- U2, R and L should be local variables by their meaning. However, there are some corner cases in 6.3.1
+		 implementation when they should inherit their values from Uold, Vold, not U,V. I preserved current behavior by
+		 using member fields, but with deep code review this can be changed by OCC team. 
+	- ProjLib_CompProjectedCurve, Approx and BRepAlgo_NormalProjection now use chronometers in a special compile mode (not in plain debug)
+- Dependency: fix265
+
+fix390
+- Summary: Support of user-defined memory manager
+- Detailed description: Using MMGT_LIBRARY environment variable, a user-defined memory manager can be dynamically loaded
+	during load time
+- Dependency: None
+
+
+fixes till fix385 (included) released as 6.3.1 Update 5
+=======================================================
+
+
+fix385
+- Summary: Port on Linux and MacOS
+- Detailed description:
+	- Makefile.* in ./make/TKernel/ and TKDraw
+	- AdvApp2Var_ApproxF2var.cxx uses Max() and Min() instead of max(), min().
+        - NCollection_BaseAllocator::CommonAllocator() avoids using Standard_Mutex::Sentry as it uses
+          static Standard_Mutex (see Standard_ErrorHandler.cxx) which may be uninitialized yet
+	- Standard_Atomic.hxx : atomic operations for MacOS are the same as for Linux
+	- AdvApp2Var: renamed macros abs, min, max to advapp_* to avoid name conflicts on Linux/Mac which forces
+          gcc to use standard C functions and therefore run-time fails (e.g. integer abs(0.92) on Mac will return
+          integer 0, not double 0.92).
+- Dependency: All previous fixes, as this one is just a port of update 4 to other platforms
+
+
+(DEFERRED) fix380
+- Summary: Replace FILE* interface of LDOM_XmlWriter with ostream&
+- Detailed description: The API that accepts FILE* causes crash when mixing VC run-time libraries (i.e. OCC was compiled
+	with VS2003 and the application that creates FILE object with VS2005. There are different sets of file
+	handles in each run-time and therefore VS2003 incorrectly processes objects created with VS2005.
+	New API accepts file name so that the file object is managed by single run-time.
+	See my blog post in March 2010 on opencascade.blogspot.com
+- Dependency: None
+
+
+=======================================================
+
+
+
+
+
+List of fixes
+
+Open CASCADE 6.3.0
+==================
+
+
+fix101
+- Summary: Thread-safe type instantiation
+- Detailed description: *.edl and Standard_DefineHandle.hxx are modified to use Standard_Mutex to protect
+      STANDARD_TYPE() object instantiation. 
+      *.edl were modified using OCC 6.3.0 version not in wok/lib. Some files were different and perhaps 
+      requires further revision by OCC team.
+
+      WOKTclTools modified to use auto-generated WOKTclTools_Intepretor file instead of hard-coded. OCC team should
+      physically remove WOKTclTools_Interpretor_proto.hxx and WOKTclTools_Replace.tcl files from the directory.
+   
+      Additional improvements in CDL extractor and Standard_DefineHandle.hxx:
+      - removed redundant Standard_EXPORT in _Type() function;
+      - _Type_() made to return const&, not &
+      - DownCast() made to return Handle(), not const Handle() which is redundant
+      - removed "// Methods PUBLIC" and alike as they had no value add
+      - 0 parents in _Type() (1 used before was incorrect but never used in OCC);
+      - using Handle() and STANDARD_TYPE() macros everywhere (instead of Handle_ and _Type) function for better consistency;
+      - minimized used of #ifndef _*_HeaderFile in callers for better readability;
+      - add virtual to DynamicType()
+      - removed code duplication in Standard_DefineHandle - use of common macros
+      - removed redundant second argument in IMPLEMENT_STANDARD_RTTI macro - this potentially may break source compatibility!
+      - CDL extraction uses DefineHandle macros instead of own generation
+      - (NOT DONE) DEFINE_STANDARD_RTTI: to remove redundant argument - will break source compatibility!
+      - (NOT DONE) make Handle_*.hxx empty (or even remove at all) puting everything ito *.hxx with help of macros. This will
+        require C++ code change of CDL extractor as it creates #include <Handle_*.hxx> directives
+      - (NOT DONE) cleanup .jxx if possible
+
+  - todo
+    - make Standard_Transient (Persistent)::Delete non-virtual to ensure that object is really destroyed in
+      Handle::EndScope(). This requires review of its ancestors.
+    - (NOT POSSIBLE) put pragma warning into IMPLEMENT TYPE
+    - remove Destroy() and destructors in descendants of Standard_Transient (e.g. ~Standard_Failure(), WOKTclTools_Interpretor, etc)
+    - Update Handle_*_proto.hxx to use macros
+    - Downcast to macro and into Handle_ and IsKind() inline (ABV's suggestion)
+    - modify CPPClient_Template.edl, CPPExt_TemplateOBJS.edl, _OBJY.edl, CPPIntExt/Engine_Template.edl, 
+      CPPIntExt/Interface_Template.edl to match templates generated by CPPExt and CSFDSchema
+
+- Dependency: None.
+- Files:
+
+
+fix105
+- Summary: Streamlining root Handle class files (Standard_Transient)
+- Detailed description:
+	- (NOT POSSIBLE) removed Standard_Transient.hxx in src directory, Standard_Transient_proto.hxx is used
+       	  to generate it (similar to _Persistent_proto.hxx). OCC team should physically remove
+          Standard_Transient.hxx in src.
+	- removed redundant macro NullObject_Raise_if in Standard_Transient_proto.hxx
+	- implemented _Type() via macros IMPLEMENT_STANDARD_TYPE
+	- more Standard_Transient methods made inline
+
+  - todo
+    - do similar modifications in Standard_Persistent. Note that Persistent is not required to be thread-safe, as
+      data storage/retrieveing is anyway sequential
+    - //remove Delete() and destructors in descendants of Standard_Transient (e.g. ~Standard_Failure(), WOKTclTools_Interpretor, etc)
+    - Downcast to macro and into Handle_ and IsKind() inline (ABV's suggestion)
+    - Handle Make Handle_Standard_Persistent similar to Handle (do not use IsReentrant() - must be documented)
+    - check Destroy() to be virtual 
+
+- Dependency: fix101
+- Files:
+
+fix106
+- Summary: Miscellaneous OCC improvements, including improved thread-safety
+- Detailed description:
+	- removed OSD_Host from IGESData.cxx and IFSelect_Functions.cxx. OSD_Host calls ::gethostbyname() deprecated
+	  function that downgrades performance (also reported on OCC forum), creates an orphan thread that skews
+   	  concurrency analysis. Anyway its results are not used (see commented code in IGESData.cxx)
+	- BSplCLib and BSplCLib - removed static variables thereby making files thread-safe. defined M_SQRT2 as
+	  constant (see math.h), not as expression sqrt (2.). This will help performance.
+	- Standard_CString.hxx ::IsEqual(strings) corrected.
+	- Transfer_Process:
+		- removed self-made "optimization" (storing last used key and binder) which is
+	          non-applicable in multi-threaded environment
+		- FindAndMask() removed
+		- Some methods made returning const& (in fact, CDL contained errors in methods declarations)
+		- miscellaneous code optimizations
+fix106.1 (see also fix204)
+	- removed all new/delete (as these are expensive) and replaced with auto-allocation (on stack) per ABV
+	  suggestion on my blog
+	
+
+
+- Dependency: None. Can be safely merged with fix105 and/or fix110.
+- Files:
+
+fix110
+- Summary: Modified files to be more reliable regarding including windows.h in other header files
+- Detailed description: windows.h can be included via some Open CASCADE *.hxx files (e.g. in Standard) and this may
+	affect function and variable names in .cxx files (e.g. var name matching macro defined in windows.h).
+	Code modified to use unique identifiers or to include windows.h in the appropriate order
+- Dependency: None.
+- Files:
+
+fix112:
+- Summary: Improvement of Standard_Mutex 
+- Detailed description: 
+	- Standard_Mutex:
+		- Standard_Mutex.hxx and .cxx modified to remove windows.h from *.hxx (to avoid spoiling files
+		  including it where order of including windows.h is important). windows.h breaks compilability
+		  of some .cxx files (including auto-generated) being inserted in the beginning before the file
+		  gets a chance to define its own windows.h-related macros.
+		- implementation is hidden into .cxx (due to windows.h independence)
+		- Lock() is implemented via standard EnterCriticalSection() instead of TryEnter...() + Sleep(). This
+		  is required for effective multi-threaded applications (proven via analysis with Intel Thread 
+		  Profiler and Parallel Amplifier). 
+		- Further possible improvements - add spincount as constructor argument and call 
+		  InitCriticalSectionAndSpinCount.
+
+- Dependency:
+- Files:
+
+fix115: (experimental!!! do not include into production code)
+- Summary: Providing framework for executing OCC algorithms in parallel
+- Detailed description: 
+	- OSD classes that enable execution via pipelines running in parallel.
+	- todo 
+		- OSD_Pipeline should create threads with OSD::SetSignal(val) - with val equal to master
+		  thread. Is there are a way to get it ?
+		- OSD_Scheduler::PerformParallelLoop() can be tried with TBB parallel_for.
+                - add Long to Standard and replace in OSD_WaitCondition::wait. This is important !!!
+                - OSD_WaitCondition and _InverseSemaphore must be ported to Unix
+
+- Dependency: fix101, fix112.
+- Files:
+
+fix116
+- Summary: Improving thread-safety
+- Detailed description: 
+	- Management of static objects in gp and Message to avoid data race (i.e. access to unprotected data
+	  from different threads)
+- Dependency: None.
+- Files: 
+
+fix117
+- Summary: Corrected implementation of OSD_InverseSemaphore - as object manipulated by value, not by handle
+- Detailed description: 
+	- InverseSemaphore must not be handle because Handle_Standard_Transient is not thread-safe and
+		 ISemaphore is used across threads. Therefore used as a pointer.
+     OSD_Pipeline:
+	- OSD::SetSignal() is now added to every thread that is created.
+	
+- Dependency: fix115.
+
+fix118
+- Summary: Improved exception handling
+- Detailed description: 
+	- Exception objects (Standard_Failure ancestors) are now defined/implemented using macros (see Standard_DefineException.hxx)
+	  in a way similar to defining handles. This enables creating user-defined exceptions without CDL.
+	  Note that as preprocessor does not allow to insert preprocessor instructions (starting with #) into macro
+	  definitions, it is impossible to define macros #<object_type>_Raise_if(). Therefore their generation is
+	  kept within CDL extractor as previously. The user does not really need to do this - he may rely on No_Exceptions
+	  macro. CPPExt_Template.edl must be copied to $WOKHOME/lib for CDL extractor to take effect.
+	- Standard_Failure has Throw() non-virtual and ancestros does not have it anymore (implementation was the same).
+    
+     OSD_signal_WNT.cxx
+	- OSD::SetSignal() now always sets signal handlers, exception handlers and structured exception (SE) translators. This is important
+	  to deal correctly in case if user's code is compiled with /EHs or /EHa. UseSETranslation() are removed,
+	  as redundant. See detailed documentation in OSD_signal_WNT.cxx on OSD::SetSignal().
+	- very detailed documentation for OSD::Setsignal() in Doygen format is now in this file.
+        - removed static variables that set signals only once to enable calling ::SetSignal() for other threads or even
+	  within the same thread if the user switched handlers before
+	- mutexes are used to control multi-threading.
+
+
+	- TODO:
+		- Minimize signal handling by OSD_Signal.cxx to SIGSEGV and SIGFPE. On Unix it currently processes
+		  all (or almost all) signals (e.g. SIGHUP) by exiting. There is no value add to that. It's better to be
+ 		  done by user apps.
+		  OCC should only handle those which it can survive after, if at all it must do anything. OCC classes may
+		  or maynot be provided for convenience but should not be set in the OCC itself.
+		- OSD_signal.cxx - if possible, get rid of sigaction() and replace with signal() and and other more
+		  advanced staff. We just need to map signals to C++ exceptions, so let's not make code more complex than needed. This
+		  can simplify the OSD API and remove. If possible, minimize implementation discrepancies between OSes.
+		- On SGI - remove use of env variable TRAP_FPE and replace with function handle_sigfpes() (as this is more
+		  reliable) - see SGI doc (http://techpubs.sgi.com/library/tpl/cgi-bin/getdoc.cgi?coll=0530&db=man&fname=/usr/share/catman/p_man/cat3/ftn/fsigfpe.z)
+		- minimize exposing OSD API by removing SegvHandler(), WntHandler() and others and keep SetSignal() only.
+		  Alternative approach is instead expose functions which map to OCC exceptions and document them, so that
+		  the user can reuse them in his own handlers.
+		- rename OSD::SetSignal() with SetHandlers() as it not only sets signal handlers but exceptions also.
+		- removed message box and call to a debugger. This is an ugly way and only pollutes the code. Moreover call
+		  to Debugger does really work on modern Windows (debuger is still ironically called due some failure within
+		  OSD_signal_WNT.cxx). In reality debugger can be attached to the process. Moreover, CSF_DEBUG_MODE was
+		  seemingly never tested - the message box could not display for FPE signals (because _fpreset() and
+		  _clearfp() were not called before it). In the ultimate case this code can be moved to some DRAW function
+                  as an example of how to implement own signal handling.
+		- add additional boolean argument Reenforce into OSD::SetSignal() that would not redefine already set user's
+		  defined handlers. In this case, OSD_Pipeline should call OSD::SetSignal(aFloatingSignal=true,
+		  aReenforce=false) and would not reset user's handlers if they were redefined by user in the main thread
+
+	
+- Dependency: fix106, fix117.
+
+fix118.1
+- Summary: Corrected fix118 by adding modified OSD.cdl
+- Detailed description: Removed UseSETranslator() methods.
+- Dependency: fix106, fix117, fix118.
+
+fix119
+- Summary: Part of fix120 (done after it) - simplification of IGESToBRep_CurveAndSurface
+- Detailed description: TransferGeometry() streamlined.
+	- No GroupWithoutBackPointers() - never called due to IsKind()
+	- transformation always attached
+	- Regressions:
+		- BUC60743 - wrong positions of free curves (due to double application of transformations -
+		  in TransferBasicCurve() and in TransferGeometry()). 
+		- Warnings for subfigure and group entities failed are no longer issued (can be fixed) - BUC60743
+		- double registration on the map for TrimmedSurfaces (in TransferGeom() and TransferBasicSurface())
+- Note: Will roll back and address later. Note that OCC6.3.0 has potential bug - not applying locations for
+		  trimmed surfaces (see for_bugs/seatmotor2-modified.igs and its boundary surface DE3).
+                  In 6.3.0 locations of trimmed surfaces (and perhaps some other faces) are not taken into account.
+                  See IGESToBRep_CurveAndSurface::TransferGeometry() - it just calls TransferTopoSurface() which 
+                  does not apply transformation to TrimmedSurfaces. If to add transformations into TransferGeometry()
+                  then a bug with BUC60743.igs appears - because free curves are moved already and there becomes
+                  double move. The wayout is to significantly rewrite IGESToBRep - either applying transformations
+                  individually (e.g. creating a protected method in _CurveAndSurface and calling from everywhere 
+                  where TransformedXXX() methods are not called) or extend fix119 and always call TransferGeometry()
+                  but this may impact performance due to if's(). Another way out is to create drivers for each type 
+                  of entities (what I did in X3D) and call TransferGeometry(). The downside of solution #2 and #3 
+                  - is that size of the shape can be bigger due to attached locations instead of directly modified
+                  definitions.
+- Dependency: None
+
+fix120 (experimental!!! do not include into production code)
+- Summary: Making translation of IGES groups (type 402) parallel
+- Detailed description:
+	- IGESToBRep_CurveAndSurface:
+		- access to Transfer_Process protected with Mutex.
+		- note that IGESToBRep_CAS made not trully effective with static mutex. In a better case it should 
+		  be a field, but the issue is that mutex should not be allowed for copying (as CriticalSection 
+		  forbids that).
+	- todo 
+		- MoniMessage_ProgressIndicator must be rewritten for concurrent applications and added to
+		  IGESToBRep_CAS
+
+	
+- Dependency: fix106, fix101, fix115, fix116.
+- Files: 
+
+
+fix202:
+- Summary: Fix regression to enable display of OCAF-stored shapes in 3D view in DRAW + commands for setting background
+- Detailed description: OCC 6.3.0 comes with ViewerTest tailored to use AIS_InteractiveContext with NIS_View.
+	Trying to display OCAF-stored shapes in new 3D views (e.g. with XShow command) lead to crash due to
+	DownCast() to NIS_View which resulted in null handle.
+	ViewerTest_ViewerCommands.cxx extended to set background (color and gradient color)
+- Dependency: None
+
+
+fix203
+- Summary: Improving BOP performance
+- Detailed description: Redesign of IntPolyh 
+	- one generic Array and instance of all others
+	- Init with minimum number of elements and resize in the future if required
+	- Standard::Allocate() instead of new, as default values are not used
+	- IntPolyh_ArrayOfStartPoints removed as it was out of use (MaillageAffinage did not implement GetSP() method). 
+		Use IntPolyh_ArrayOfTangentZones instead.
+- Dependency: None
+- See also:	fix375
+
+
+fix204
+- Summary: Creation of OSD_ReadWriteLock and improvement of BSplSLib, BSplCLib and PLib to be usable for multi-threading with better performance
+- Detailed description: OSD_ReadWriteLock is implementation of a patter readwritelock (see wikipedia for example) that
+		allows multiple concurrent reading but once there is a writer it blocks other writers and readers
+		*Lib are now use TLS (thread-local storage) instead of constant allocation/deallocation which is time-consuming
+		With this implementation *Lib are slightly less fast than in 6.3.0 but much faster than in initial fix106 (where
+		allocation/deallocation was used)
+	- REMAINS TO BE COMPLETED OR 
+		- OSD_RWL can be used in IGESToBRep_CurveAndSurface when accessing its map, to increase concurrency
+		- ABV's idea to use auto variables in *PLib or avoid using RWL creating buffers only once
+- Dependency: fix115.1, fix115
+
+fix210:
+- Summary: Extrema redesign
+- Detailed description:
+	- Temporary modification: GeometryTest
+fix210.0:
+	- IntTools_BeanBeanIntersector: 
+		ComputeUsingExtrema() - take one of two GeomAdaptors out of cycle as it does not change
+	- Extrema
+		- SquareDistance. Check TrimmedSqDistances !! Search Distance(), Magnitude() inside Extrema
+		- Point return const& and update callers (may add private copy constructor and operator= to ensure update of all callers)
+		- Loading and deferred perform
+		- caching point calculation
+		- Raise_if instead of ::Raise()
+	- Updated callers: gce_MakeCirc, GC_MakeArcOfCircle, etc
+fix210.1:
+	- Extrema:
+		- Replacement of all internal calculations with SquareDistance
+fix210.2:
+	- IntTools:
+		- create adaptor only when needed but still once per UsingExtrema() call
+fix210.3:
+	- Extrema:
+		- ExtCC, _GenExtCC, _GExtCC:
+			- deferred perform, independent loading of curve, caching of points, etc
+			- simplified code of GExtCC::Perform()
+fix210.4:
+	- Extrema:
+		- _CurveCache and switching _GExtCC and _GenExtCC to its using for maximum reuse of calculations
+fix210.5:
+	- Extrema:
+		- cache of myDu and myDv in FuncExtCC
+
+	- TODO (if needed):
+		rename into SquareDistance() and LowerSquareDistance(), this may require further updates downstream and update of documentation
+		Geom2dAPI_*,
+		GeomAPI_*,
+		GeomFill_SectionPlacement
+		BRepExtrema_DistShapeShape
+
+- Dependency: None
+
+
+
+fix211
+- Summary: Speed up of Geom_BSplineCurve, _BSplineSurface and Geom2d_BSplineCurve ::IsCacheValid()
+- Detailed description: Division NewParameter = (NewParameter - parametercache) / spanlenghtcache  takes much time, so normalization is avoided
+- Dependency: None
+
+fix212
+- Summary: Speed up of math_FunctionSetRoot (used in Extrema)
+- Detailed description: 
+	- Excluding recalculation in points which did not progress during iteration 
+	- Sqrt replaced with sqrt
+	- minimized use of sqrt
+	- static variable mydebug use surrounded with #ifdef DEB
+	- minimized use of Abs in Bounds()
+- Dependency: None
+
+fix215
+- Summary: Declaring methods as protected in XCAFApp_Application and XCAFPrs_AISObject
+- Detailed description: Declaring protected instead of private enables subclassing these classes
+- Dependency: None
+
+fix220
+- Summary: Removal of extra OpenGL buffer clearing to minimize flicker
+- Detailed description: Inspired by fix on http://www.opencascade.org/org/forum/thread_8291/. Extended to cover
+	 non-Windows platform (not tested !)
+- Dependency: None
+
+fix225
+- Summary: Support of progress indicator in RWStl and optimization of reading Ascii.
+- Detailed description: 
+	- Progress indicator added to Write...(), Read...(). 
+	- reduction of string buffers reallocation when writing STL files in ascii mode
+- Dependency: None
+
+fix230
+- Summary: BRepTools_ReShape::Status() incorrectly returns new result for shapes with location
+- Detailed description: With MyConsiderLocation mode = True, Status() returns a shape with null location
+	Fixed version now uses Value() to check the result. Additional fix in Value() - to multiply result
+	location by shape location, not vice versa.
+	Test case - import shaver.igs into XDE, and check that subshapes are of full yellow color. Quick
+	check - entity 10921 and its 1st face (10922). Prior to the fix, the TransferProcess incorrectly
+	stored a null location result and therefore colors were not assigned to the resulting subshape.
+- Dependency: None
+
+
+fix235
+- Summary: Incorrect placement of ZBuffer trihedron
+- Detailed description: OpenGl_triedron.c used weird check isWithinView and correctly placed ZBuffer trihedron
+	only when the model went out of the view. Fix ignores this check. Sergey Anikin claimed this must have
+	been fixed in 6.3.1.
+- Dependency: None
+
+fix240
+- Summary: Minor performance improvements
+- Detailed description: Variables out of cycle, use of const& instead of =.
+- Dependency: None
+
+fix250
+- Summary: Caching of B-Splines
+- Detailed description:
+	- Caching at the last span never worked - it stored incorrect span length (negative) and made wrong checks 
+	at IsCacheValid()
+	- (Not fixed yet) BSPlineSurface called BuildCache() at middle of a span being cached, while curve -
+	  at start parameter of a span. why ?
+	- Curve uses cache up to D3(), Surface - D2 
+- Dependency: None
+
+fix255 (Deferred) 
+- Summary: OSD_Chronometer (and _Timer) to be based on GetProcessTimes() to correctly measure time in multi-threaded apps
+- Detailed description:
+- Dependency: None
+
+fix260
+- Summary: BSplCLib, BSplSLib, PLib - made reentrant 
+- Detailed description: Use of automemory (on stack) and heap only if default size (for 4096 elements, i.e. 32K) is not enough.
+	fix106.x, fix204 must disregarded. 
+- Dependency: None
+
+
+fix265
+- Summary: Thread-safety/re-entrability improvements
+- Detailed description: 
+	GeomConvert_ApproxCurve/_Surface - protect shared resource with mutex (cannot make shared resource local)
+	IntCurve_IntPolyPolygen.gxx - make variable local (though it's out of use effectively)
+	Intf_* - make static vars either const for explicity, or class members, or local variables; for some class this required to move static function as private method
+	IntcurvesFace - make static variables local
+	IntCurveSurface - make static variables local and const where possible
+	BRep_Tool - local instead of static
+ (+fixes for UVBox)
+	IntImp - use of local buffers and wrapping with arrays (to avoid heap allocation and adverse impact on performance)
+	BRepLib - local instead of static, using mutex
+	ProjLib - made static var a class field
+	
+	Approx - made static var a class field, use of mutex (like in GeomConvert_Approx)
+	BRepclass3d - local instead of static; _SolidExplorer.cxx - simplified code, made static var a class field, local instead of static
+ Everywhere to use Sentry !!!
+	
+	
+- Dependency: None
+
+fix267
+- Summary: ShapeExtend_WireData::Edge() to return const& 
+- Detailed description: This helps performance due to reduced data copying and handle::BeginScope(),::EndScope()
+- Dependency: None
+
+
+fix270
+- Summary: Typo in ShapeFix_Wire::FixEdgeCurves() for checking same range
+- Detailed description: Note that ShapeAnalysis_Edge::PCurve() returns reversed range for reversed edge
+	 while comparison is done regardless orientation
+- Dependency: None
+
+
+fix275
+- Summary: Using higher precision (17) in BRepTools::Write()
+- Detailed description:
+- Dependency: None
+
+
+fix280
+- Summary: ShapeFix_Edge::SameParameter() now retains original 3D interval
+- Detailed description: See comments ShapeFix_Edge::SameParameter(). In the case of periodic curve, 3D range lying
+	outside of a period was previously adjusted to fit into it. Thus copyedge used different ranges than original
+	edge and in the case its pcurves had to be copied back, ranges and pcurves became inconsistent.
+	Test case - edge-fix280.brep. Use fixshape command in Draw and check 3rd edge. Withoutout the fix the pcurve
+	became wrong and new redundant edges were inserted.
+- Dependency: None
+
+//fix285 (deferred)
+- Summary: Enable subclassing Message_ProgressSentry making its fields protected and methods virtual
+- Detailed description: Subclassing can be useful for example, for nested sentries for multi-threaded apps where methods will have to use
+	 locks before calling Message
+- Dependency: None
+
+
+fix290
+- Summary: Thread-safety/re-entrability improvements
+- Detailed description:
+	AIS_InteractiveContext.cxx, AIS_GlobalStatus.cxx - avoid using static ListIterator
+- Dependency: None
+
+fix295 (deferred)
+- Summary: Make the code of the static function GetDeflection() in Prs3d_ShadedShape.gxx accessible as static method
+- Detailed description: This is to avoid code duplication in user's code 
+- Dependency: None
+
+fix300
+- Summary: Standard_MMgrRaw::ReAllocate() trying more if original realloc() fails
+- Detailed description: If original realloc() fails ReAllocate() will now Free() and Allocate(). This can help in two cases:
+	a. when free memory is low and freeing already allocated chunk can help get a larger chunk (e.g. if free chunk
+  	   is adjacent to previously held
+	b. when replacing OS memory allocator (e.g. with Intel TBB which initially discovered this issue) when
+	   memory was allocated using OS malloc() and then substituted realloc() returning NULL causing Standard_OutOfMemory
+	   exception.
+        Note that in either case initially allocated memory will leak.
+
+- Dependency: None
+
+
+fix305
+- Summary: Improvements in Vrml 2.0 exporter to make it 
+- Detailed description:
+	- correct processing of normals of reversed faces;
+	- enabling customization of default materials;
+	- making export of normals optional
+	- possibility to customize WorldInfo
+- Dependency: None
+
+fix310
+- Summary: Adding debug output when any Standard_Failure exception is thrown
+- Detailed description: Standard_Failure::Throw() method has std::cerr output regardless if the exception will be caught
+	 or not. This helps to notice exceptions that will eventually be caught.
+- Dependency: None
+
+fix315
+- Summary: Corrections in BRepExtrema
+- Detailed description: Added sqrt() to correct oversight in fix210 (noticed my Francois Louzon) 
+- Dependency: None
+
+fix320
+- Summary: Corrections in VRML reader
+- Detailed description: 
+	- Parser buffer extended from 8K to 64K
+	- Correct processing of string lists (MFString type)
+- Dependency: None
+
+fix325
+- Summary: More corrections for thread safety
+- Detailed description:
+	- PLib 
+- Dependency: None
+
+
+Open CASCADE 6.3.1
+==================
+
+fix330
+- Summary: StlMesh_Mesh now have protected (not private) data fields
+- Detailed description:
+	- StlMesh_Mesh assumes inheritance (many methods are virtual) but subclasses cannot access/change data fields
+- Dependency: None
+
+fix335
+- Summary: Corrected modifications in fix265 in ProjLib to restore functions signature.
+- Detailed description: Corrected modifications in fix265 in ProjLib where signature of methods was changed from const to non-const. This
+	 hade the fact that virtual method were not overridden what caused exception when using ProjLib_CompProjectCurve
+	 (in GeomPlate algorithm). Now the fix usis const_cast in run-time.
+- Dependency: none (no direct dependence on fix265)
+
+fix340
+- Summary: Improving thread-safety
+- Detailed description:
+	- GeomFill.cxx - removed static variables
+- Dependency: None
+
+fix345
+- Summary: BRepTools_ReShape now is able to accumulate shape mapping from another ShapeBuild_ReShape
+- Detailed description: New method void BRepTools_ReShape::Join (const Handle(ShapeBuild_ReShape)&) added.
+	The use case for it is concurrent processing of shapes and then reduction of results into a single ReShape.
+- Dependency: None
+
+fix350
+- Summary: Improvement of thread-safety by adopting class _EvaluationFunction instead of a function.
+- Detailed description:
+	- Modifications analogous to ones introduced in 6.3.1 for AdvApprox et all.
+	- BSplSLib, BSplCLib, AdvApp2Var_EvaluatorFunc2Var
+	- GeomConvert (removes fix265 modifs), Geom2dConvert, GeomLib, GeomPlate
+
+	AdvApp2Var contains a lot of Fortran-derived code which uses static variables. Conversion into class
+	members will be a heavy and attention-required task. Until that done, any call to AdvApp2Var (or
+	algorithms using it - such GeomApprox_Surface called from ShapeHealing BSplineRestriction or GeomPlate)
+	require use of global lock.
+- Dependency: None
+
+
+fix355
+- Summary: Improvement of BRepTools_Modifer
+- Detailed description:
+	 Removal of static in BRepTools_Modifier
+	 Modifier lost pcurve ranges on non-SameRange edges
+- Dependency: None
+
+fix360
+- Summary: (POSTPONED) Corrected processing of pcurves in BRepTools_TrsfModification::NewCurve2d()
+- Detailed description:
+	Redundant TrimmedCurve
+	Trim for periodic curves
+	PCurves on planes
+- Dependency: None
+
+fix365
+- Summary: Extending XCAFPrs_AISObject to enable customization of default color
+- Detailed description: virtual DefaultStyle() method added.
+	Note that default style object has not been made a data member to avoid memory consumption
+- Dependency: None
+
+
+fixes till 365 released as 6.3.1 Update 2
+=====================================================
+
+fix370
+- Summary: Optimization of BRepMesh_DiscretFactory to cache registered factory methods
+- Detailed description: In 6.3.1 any custom factory method (*::Discret()) is loaded from dynamic library
+	upon every call to mesher. This was extremely slow and made the mechanism unusable.
+	Now library is loaded only once and then its factory method is cached in _DiscretFactory.
+	- This requires adding an instance of DataMap<AsciiString,OSD_Function>. To optimize it is added into
+	  OSD package and Draw and Plugin packages reuse it.
+- Dependency: None
+
+
+fixes till 370 released as 6.3.1 Update 3
+=====================================================
+
+
+fix371 - ditto fix118.1 (put here to explicitly show that it did not make original 6.3.1 update3).
+
+
+fix375
+- Summary: Initialization of IntPolyh_DynamicArray using object default constructor
+- Detailed description: In fact, fix203 assumed that default objects are not used, however this turned to be incorrect.
+			IntPolyh_MaillageAffinage::LinkEdges2Triangles() does read values and the algorithm goes wrong
+			if the values have not been initialized yet.
+- Dependency: fix203
+- See also: fix376
+
+
+fix376
+- Summary: Rolling back fix203 and fix375
+- Detailed description: In fact, the original fix did not assume object copying during memory extension. However this
+	assumption did not prove correct on one example (from cfturbo). The more correct fix should employ use of
+	Vector (dynamically growing array which preserves already allocated objects).
+	At the moment, the original OCC code is restored thus all performance improvements are rolled back. OCC code
+	pre-allocates huge amount of memory (e.g. 30000 objects) while actually using a few hundreds, so pay off is
+	tremendous. On the other hand, the code is also not protected against the case when initial allocation is
+	insufficient.
+- Dependency: None
+
+fixes till 376 released as 6.3.1 Update 4
+=====================================================
+
+- Summary:
+- Detailed description:
+- Dependency: None
+
+
+- Summary:
+- Detailed description:
+- Dependency: None
+
+======================================================
+2011-03-09 : pushed OCC 6.5.0 source to the repository
+======================================================
