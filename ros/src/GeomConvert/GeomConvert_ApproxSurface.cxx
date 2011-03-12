@@ -8,9 +8,30 @@
 #include <TColStd_HArray1OfReal.hxx>
 #include <AdvApprox_PrefAndRec.hxx>
 
-static Handle(Adaptor3d_HSurface) fonct; 
+class GeomConvert_ApproxSurface_Eval : public AdvApp2Var_EvaluatorFunc2Var
+{
+public:
+  GeomConvert_ApproxSurface_Eval (const Handle(Adaptor3d_HSurface)& thefonct) :
+    fonct (thefonct) {}
 
-extern "C" void mySurfEval1(Standard_Integer * Dimension,
+  virtual void Evaluate (Standard_Integer * Dimension,
+					     Standard_Real    * UStartEnd,
+					     Standard_Real    * VStartEnd,
+					     Standard_Integer * FavorIso,
+					     Standard_Real    * ConstParam,
+				         Standard_Integer * NbParams,
+				         Standard_Real    * Parameters,
+				         Standard_Integer * UOrder,
+				         Standard_Integer * VOrder,
+				         Standard_Real    * Result,
+				         Standard_Integer * ErrorCode);
+
+private:
+  Handle(Adaptor3d_HSurface) fonct; 
+};
+
+
+void GeomConvert_ApproxSurface_Eval::Evaluate (Standard_Integer * Dimension,
 			   // Dimension
 			   Standard_Real    * UStartEnd,
 			   // StartEnd[2] in U
@@ -257,7 +278,7 @@ GeomConvert_ApproxSurface::GeomConvert_ApproxSurface(const Handle(Geom_Surface)&
 {
   Standard_Real    U0, U1, V0, V1;
 
-  fonct = new (GeomAdaptor_HSurface)(Surf); // Initialisation de la surface algorithmique
+  Handle(Adaptor3d_HSurface) fonct = new (GeomAdaptor_HSurface)(Surf); // Initialisation de la surface algorithmique
   Surf->Bounds(U0, U1, V0, V1);
 
 // " Init des nombres de sous-espaces et des tolerances"
@@ -305,7 +326,7 @@ GeomConvert_ApproxSurface::GeomConvert_ApproxSurface(const Handle(Geom_Surface)&
   AdvApprox_PrefAndRec pVDec(VDec_C2,VDec_C3);
 
 //POP pour WNT
-  AdvApp2Var_EvaluatorFunc2Var ev = mySurfEval1;
+  GeomConvert_ApproxSurface_Eval ev (fonct);
   AdvApp2Var_ApproxAFunc2Var approx(nb1, nb2, nb3,
 				    nul1,nul1,eps3D,
 				    nul2,nul2,epsfr,

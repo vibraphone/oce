@@ -243,7 +243,7 @@ const TCollection_ExtendedString& Message_Msg::Get ()
 {
   // remove all non-initialised format specifications
   Standard_Integer i, anIncrement = 0;
-  static const TCollection_ExtendedString anUnknown ("UNKNOWN");
+  const TCollection_ExtendedString anUnknown ("UNKNOWN");
   for (i = 1; i < mySeqOfFormats.Length(); i += 3)
   {
     TCollection_ExtendedString aRightPart =

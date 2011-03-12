@@ -91,9 +91,11 @@ raises InterfaceError, TransferFailure
 
     	    	-- --    Nested Classes    -- --
 
-        class TransferMap instantiates IndexedDataMap from TCollection
-	    	(TheStart,Binder,TheMapHasher);
-    	---Purpose : This is the Map used by TransferProcess
+
+
+        private class TransferMap instantiates IndexedDataMap from TCollection
+            (TheStart,Binder,TheMapHasher);
+        ---Purpose : This is the Map used by TransferProcess
 
 
         class Iterator  inherits TransferIterator
@@ -291,13 +293,13 @@ is
     	--   (Transient,Finder) as privileged kinds of Result
 
     Find (me; start : TheStart) returns mutable Binder;
+    ---C++ : return const &
     ---Purpose : Returns the Binder which is linked with a starting Object
     --           It can either bring a Result (Transfer done) or none (for a
     --           pre-binding).
     --           If no Binder is linked with <start>, returns a Null Handle
     --           Considers a category number, by default 0
     ---Warning : it is not equivalent to IsBound, which demands a Result
-    --  C++ : return const &
 
     IsBound (me; start : TheStart) returns Boolean;
     ---Purpose : Returns True if a Result (whatever its form) is Bound with
@@ -309,13 +311,6 @@ is
     ---Purpose : Returns True if the result of the transfer of an object is
     --           already used in other ones. If it is, Rebind cannot change it.
     --           Considers a category number, by default 0
-
-    FindAndMask (me : mutable; start : TheStart)
-    	returns mutable Binder  is private;
-    ---Purpose : Same as Find but stores the last access to the map, for a
-    --           faster access on next calls (as Bind does too)
-    --           Considers a category number, by default 0
-    --  C++ : return const &
 
     Bind (me : mutable; start : TheStart; binder : mutable Binder)
     ---Purpose : Creates a Link a starting Object with a Binder. This Binder
@@ -588,7 +583,6 @@ is
     --           
     --           Remark : if ErrorHandle is set, no exception is raised : see
     --           the method SetErrorHandle for more details
-    --  C++ : return const &
 
     TransferProduct (me : mutable; start : TheStart)  returns mutable Binder
     ---Purpose : Internal action of Transfer, called by Transferring, with or
@@ -713,9 +707,6 @@ fields
     therootm : Boolean;           -- Flag for Root Management set or not
     theroots : IndexedMapOfInteger; -- indices of roots in the map
 
-    thelastobj : TheStart;        -- Last Starting Object Bound
-    thelastbnd : Binder;          -- Its attached Binder (noted to optimize)
-    theindex   : Integer;         -- And Index
     theactor   : Actor;
     themap     : TransferMap;
 

@@ -42,9 +42,6 @@
 #include <BRep_Tool.hxx> 
 #include <BRepClass_FaceClassifier.hxx>
 //<-OCC454(apo)
-static Standard_Integer numedg=0;
-static gp_Vec staticd1u_gp_vec;
-static gp_Vec staticd1v_gp_vec;
 
 //=======================================================================
 //function : FindAPointInTheFace
@@ -72,7 +69,22 @@ Standard_Boolean BRepClass3d_SolidExplorer::FindAPointInTheFace
 (const TopoDS_Face& _face,
  gp_Pnt& APoint_,
  Standard_Real& u_, Standard_Real& v_,
- Standard_Real& param_) 
+ Standard_Real& param_)
+{
+  gp_Vec staticd1u_gp_vec, staticd1v_gp_vec;
+  return FindAPointInTheFace (_face,APoint_,u_,v_,param_,staticd1u_gp_vec,staticd1v_gp_vec);
+}
+//=======================================================================
+//function : FindAPointInTheFace
+//purpose  : 
+//=======================================================================
+
+Standard_Boolean BRepClass3d_SolidExplorer::FindAPointInTheFace
+(const TopoDS_Face& _face,
+ gp_Pnt& APoint_,
+ Standard_Real& u_, Standard_Real& v_,
+ Standard_Real& param_,
+ gp_Vec& staticd1u_gp_vec, gp_Vec& staticd1v_gp_vec)
 {   
   TopoDS_Face face=_face;
   face.Orientation(TopAbs_FORWARD);
@@ -82,11 +94,10 @@ Standard_Boolean BRepClass3d_SolidExplorer::FindAPointInTheFace
   gp_Vec2d T;
   gp_Pnt2d P;
   //Standard_Boolean Ok = Standard_False;
-  Standard_Integer nedg=1;
   for (faceexplorer.Init(face,TopAbs_EDGE); 
        faceexplorer.More(); 
        faceexplorer.Next()) {
-    if(numedg==0 || nedg++==numedg) { 
+    if(Standard_True) { 
       TopoDS_Edge Edge = TopoDS::Edge(faceexplorer.Current());
       c.Initialize(Edge,face);
 #ifdef DEB
@@ -202,7 +213,9 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
           if(++NbPntCalc>=IndexPoint) { 
             if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
               u_=u; v_=v;
-              surf->D1(u,v,APoint_,staticd1u_gp_vec,staticd1v_gp_vec);
+              surf->D1(u,v,APoint_,
+                const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1u_gp_vec,
+                const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1v_gp_vec);
 	      IndexPoint = NbPntCalc;
               return(Standard_True);
             }
@@ -215,7 +228,9 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
 	  if(++NbPntCalc>=IndexPoint) {
 	    if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
 	      u_=u; v_=v;
-	      surf->D1(u,v,APoint_,staticd1u_gp_vec,staticd1v_gp_vec);
+	      surf->D1(u,v,APoint_,
+            const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1u_gp_vec,
+            const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1v_gp_vec);
 	      IndexPoint = NbPntCalc;
 	      return(Standard_True);
 	    }
@@ -227,7 +242,9 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
 	  if(++NbPntCalc>=IndexPoint) { 
 	    if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
 	      u_=u; v_=v;
-	      surf->D1(u,v,APoint_,staticd1u_gp_vec,staticd1v_gp_vec);
+	      surf->D1(u,v,APoint_,
+            const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1u_gp_vec,
+            const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1v_gp_vec);
 	      IndexPoint = NbPntCalc;
 	      return(Standard_True);
 	    }
@@ -239,7 +256,9 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
 	  if(++NbPntCalc>=IndexPoint) {
 	    if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
 	      u_=u; v_=v;
-	      surf->D1(u,v,APoint_,staticd1u_gp_vec,staticd1v_gp_vec);
+	      surf->D1(u,v,APoint_,
+            const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1u_gp_vec,
+            const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1v_gp_vec);
 	      IndexPoint = NbPntCalc;
 	      return(Standard_True);
 	    }
@@ -257,7 +276,9 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
 	  if(++NbPntCalc>=IndexPoint) {
 	    if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
 	      u_=u; v_=v;
-	      surf->D1(u,v,APoint_,staticd1u_gp_vec,staticd1v_gp_vec);
+	      surf->D1(u,v,APoint_,
+            const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1u_gp_vec,
+            const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1v_gp_vec);
 	      IndexPoint = NbPntCalc;
 	      return(Standard_True);
 	    }
@@ -269,7 +290,9 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
       if(++NbPntCalc>=IndexPoint) {
 	if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
 	  u_=u; v_=v;
-	  surf->D1(u,v,APoint_,staticd1u_gp_vec,staticd1v_gp_vec);
+	  surf->D1(u,v,APoint_,
+        const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1u_gp_vec,
+        const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1v_gp_vec);
 	  IndexPoint = NbPntCalc;
 	  return(Standard_True);
 	}
@@ -280,7 +303,9 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
   else { 
     //printf("BRepClass3d_SolidExplorer Face non trouvee ds la map \n");
   }
-  return(BRepClass3d_SolidExplorer::FindAPointInTheFace(Face,APoint_,u_,v_,param_));
+  return(BRepClass3d_SolidExplorer::FindAPointInTheFace(Face,APoint_,u_,v_,param_,
+    const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1u_gp_vec,
+    const_cast<BRepClass3d_SolidExplorer*>(this)->staticd1v_gp_vec));
   
 }
 
@@ -363,6 +388,7 @@ static Standard_Integer IsInfiniteUV (Standard_Real& U1, Standard_Real& V1,
   Standard_Integer NbPointsOK=0;
   Standard_Integer NbFacesInSolid=0;
 
+  Standard_Real TolU = Precision::PConfusion(), TolV = TolU;
   do { 
     myFirstFace++; 
     faceexplorer.Init(myShape,TopAbs_FACE);
@@ -404,7 +430,6 @@ static Standard_Integer IsInfiniteUV (Standard_Real& U1, Standard_Real& V1,
 
 //       if(IsInfiniteUV(U1,V1,U2,V2)){//OCC454(apo)->
       GeomAdaptor_Surface GA(BRep_Tool::Surface(face));
-      static Standard_Real TolU = Precision::PConfusion(), TolV = TolU;
       Extrema_ExtPS Ext(P,GA,TolU,TolV);
       if (Ext.IsDone() && Ext.NbExt() > 0) {
 	// evaluate the lower distance and its index;
@@ -448,7 +473,6 @@ static Standard_Integer IsInfiniteUV (Standard_Real& U1, Standard_Real& V1,
 	  _Par = V.Magnitude(); 
 	  L = gp_Lin(P,V);
 	  ptfound=Standard_True;
-	  numedg=0;
 	  //modified by NIZNHY-PKV Thu Nov 14 12:25:28 2002 f
 	  //return ;
 	  return 0;
@@ -477,7 +501,6 @@ static Standard_Integer IsInfiniteUV (Standard_Real& U1, Standard_Real& V1,
 	      ptfound=Standard_True;
 	      if(maxscal>0.2) { 
 		myParamOnEdge=svmyparam;
-		numedg=0;
 		//modified by NIZNHY-PKV Thu Nov 14 12:25:28 2002 f
 		//return ;
 		return 0;
@@ -490,7 +513,6 @@ static Standard_Integer IsInfiniteUV (Standard_Real& U1, Standard_Real& V1,
       while(IndexPoint<200 && NbPointsOK<16);
 
       myParamOnEdge=svmyparam;
-      numedg=0;
       if(maxscal>0.2) {		  
 	//modified by NIZNHY-PKV Thu Nov 14 12:25:28 2002 f
 	//return ;

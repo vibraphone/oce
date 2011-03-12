@@ -1963,14 +1963,27 @@ static Standard_Boolean CanBeTreated(Handle(Geom_BSplineSurface)& BSurf)
 }
 
 //=======================================================================
-//function : law_evaluator
+//class : law_evaluator
 //purpose  : usefull to estimate the value of a function of 2 variables
 //=======================================================================
 
-static GeomLib_DenominatorMultiplierPtr MyPtr = NULL ;
+class law_evaluator : public BSplSLib_EvaluatorFunction
+{
+public:
+  law_evaluator (const GeomLib_DenominatorMultiplierPtr theMyPtr) :
+    MyPtr (theMyPtr) {}
 
+  virtual void Evaluate (const Standard_Integer DerivativeRequest,
+                         const Standard_Real    UParameter,
+                         const Standard_Real    VParameter,
+                         Standard_Real&         Result,
+                         Standard_Integer&      ErrorCode);
 
-static void law_evaluator(const Standard_Integer  DerivativeRequest,
+private:
+  GeomLib_DenominatorMultiplierPtr MyPtr;
+};
+
+void law_evaluator::Evaluate(const Standard_Integer  DerivativeRequest,
 			  const Standard_Real     UParameter,
 			  const Standard_Real     VParameter,
 			  Standard_Real &         Result,
@@ -2129,7 +2142,7 @@ static void FunctionMultiply(Handle(Geom_BSplineSurface)&          BSurf,
  BSplCLib::KnotSequence(NewKnots->ChangeArray1(),NewMults->ChangeArray1(),FlatKnots);
 
  GeomLib_DenominatorMultiplier          local_denominator(BSurf,FlatKnots) ;
- MyPtr = &local_denominator ;                 //definition of a(u,v)
+ GeomLib_DenominatorMultiplierPtr MyPtr = &local_denominator ;                 //definition of a(u,v)
 
  BuildFlatKnot(surface_u_knots,
 	       surface_u_mults,
@@ -2164,7 +2177,7 @@ static void FunctionMultiply(Handle(Geom_BSplineSurface)&          BSurf,
  BSplCLib::KnotSequence(newuknots->ChangeArray1(),newumults->ChangeArray1(),newuflatknots);
  BSplCLib::KnotSequence(newvknots->ChangeArray1(),newvmults->ChangeArray1(),newvflatknots);
 //POP pour WNT
- BSplSLib_EvaluatorFunction ev = law_evaluator;
+ law_evaluator ev (MyPtr);
 // BSplSLib::FunctionMultiply(law_evaluator,               //multiplication
  BSplSLib::FunctionMultiply(ev,               //multiplication
 			    BSurf->UDegree(),

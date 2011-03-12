@@ -23,7 +23,7 @@
 #include <BRep_Tool.hxx>
 #include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
 #include <TopoDS_Edge.hxx>
-
+#include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
 
 static void CopyRanges (const TopoDS_Edge& toedge, 
 				  const TopoDS_Edge& fromedge,
@@ -238,7 +238,7 @@ TopoDS_Shape BRepTools_ReShape::Value (const TopoDS_Shape& ashape) const
   if (myConsiderLocation) {
     //sln 29.11.01 Bug22: Recalculate location of resulting shape in accordance with
     //whether result is from map or not
-    if(fromMap) res.Location(ashape.Location()*res.Location());
+    if(fromMap) res.Location(res.Location() * ashape.Location());
     else res.Location(ashape.Location());
   }
 
@@ -258,42 +258,22 @@ Standard_Integer BRepTools_ReShape::Status(const TopoDS_Shape& ashape,
   Standard_Integer res = 0;
   if (ashape.IsNull())  {  newsh.Nullify();  return res;  }
 
-  TopoDS_Shape shape = ashape;
-  TopLoc_Location aLocSh = shape.Location();
-  if (myConsiderLocation) {
-    TopLoc_Location nullLoc;
-    shape.Location ( nullLoc );
-  }
-
-  if ( myConsiderOrientation && shape.Orientation()==TopAbs_REVERSED ) {
-    if (!myRMap.IsBound (shape))  {  newsh = shape;  res = 0; }
-    else {  newsh = myRMap.Find (shape);  res = 1;  }
-  } 
-  else {
-    if (!myNMap.IsBound (shape))  {  newsh = shape;  res = 0; }
-    else {  newsh = myNMap.Find (shape);  res = 1;  }
-  }
-  if (res > 0) {
-    if (newsh.IsNull()) res = -1;
-    else if (newsh.IsEqual (shape)) res = 0;
-    else if ( last && ((myConsiderLocation && ! newsh.IsPartner (shape)) ||
-                       (!myConsiderLocation && ! newsh.IsSame (shape)))) {
+  newsh = Value (ashape);
+  if (newsh.IsNull()) res = -1;
+  else if (newsh != ashape) {
+    res = 1;
+    if ( last && ((myConsiderLocation && ! newsh.IsPartner (ashape)) ||
+                  (!myConsiderLocation && ! newsh.IsSame (ashape)))) {
       //TopoDS_Shape newnewsh;
       //Standard_Integer newres = Status (newsh, newnewsh, last);
       //newsh = newnewsh;
       //if (newres) res = newres;
       // sln 29.11.01 Bug24: Correction iteration through maps. Way of iteration used early does not
       // correspond to way of storing information in the maps.
-      newsh = Apply(shape, TopAbs_SHAPE);
+      newsh = Apply(ashape, TopAbs_SHAPE);
       if (newsh.IsNull()) res = -1; 
-      if (newsh.IsEqual (shape)) res = 0;
+      else if (newsh.IsEqual (ashape)) res = 0;
     }
-  }
-  if(myConsiderLocation && !newsh.IsNull()) 
-  {
-    TopLoc_Location aResLoc = (res >0 && !newsh.Location().IsIdentity() ? 
-      aLocSh * newsh.Location() : aLocSh);
-    newsh.Location(aResLoc);
   }
   return res;
 }
@@ -545,6 +525,28 @@ TopoDS_Shape BRepTools_ReShape::Apply (const TopoDS_Shape& shape,
 {
   return ShapeExtend::DecodeStatus ( myStatus, status );
 }*/
+
+//=======================================================================
+//function : Join
+//purpose  : 
+//=======================================================================
+
+/*! If \a theOther contains a subshape that has also been stored in \a this
+    then \a theOther result will override \a this.
+
+    \a theOther must be not null, otherwise an exception will be thrown.
+*/
+void BRepTools_ReShape::Join (const Handle(BRepTools_ReShape)& theOther)
+{
+  TopTools_DataMapIteratorOfDataMapOfShapeShape anIt (theOther->myNMap);
+  for (; anIt.More(); anIt.Next()) {
+    Standard_Boolean aNew = myNMap.Bind (anIt.Key(), anIt.Value());
+  }
+  anIt.Initialize (theOther->myRMap);
+  for (; anIt.More(); anIt.Next()) {
+    Standard_Boolean aNew = myRMap.Bind (anIt.Key(), anIt.Value());
+  }
+}
 
 
 //=======================================================================

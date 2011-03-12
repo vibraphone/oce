@@ -182,10 +182,15 @@ void BRepMesh_FastDiscret::Perform(const TopoDS_Shape& shape)
   }
   
   // mesh faces in parallel threads using TBB
+#if 0
+  //Concurrent processing had to be disabled due to data races in B-Spline surfaces
+  //See http://opencascade.blogspot.com/2010/05/open-cascade-and-multi-threading-again.html
+  //for explanation
 #ifdef HAVE_TBB
   if (Standard::IsReentrant())
     tbb::parallel_for_each (aFaces.begin(), aFaces.end(), *this);
   else
+#endif
 #endif
   for (std::vector<TopoDS_Face>::iterator it(aFaces.begin()); it != aFaces.end(); it++)
     Process (*it);

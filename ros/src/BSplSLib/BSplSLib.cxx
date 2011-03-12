@@ -9,11 +9,9 @@
 // pmn  07-10-96 : Correction de DN dans le cas rationnal.
 // pmn  06-02-97 : Correction des poids dans RationalDerivative. (PRO700)
 
-#define No_Standard_RangeError
-#define No_Standard_OutOfRange
-
 #include <BSplSLib.ixx>
 #include <PLib.hxx>
+#include <PLib_LocalArray.hxx>
 #include <BSplCLib.hxx>
 #include <TColgp_Array2OfXYZ.hxx>
 #include <TColgp_Array1OfXYZ.hxx>
@@ -38,10 +36,9 @@ struct BSplSLib_DataContainer
 {
   BSplSLib_DataContainer (Standard_Integer UDegree, Standard_Integer VDegree) 
   {
-    if ( UDegree > BSplCLib::MaxDegree() || 
-         VDegree > BSplCLib::MaxDegree() || 
-         BSplCLib::MaxDegree() != 25 )
-      Standard_OutOfRange::Raise ("BSplCLib: bspline degree is greater than maximum supported");
+    Standard_OutOfRange_Raise_if (UDegree > BSplCLib::MaxDegree() ||
+        VDegree > BSplCLib::MaxDegree() || BSplCLib::MaxDegree() > 25,
+        "BSplSLib: bspline degree is greater than maximum supported");
   }
 
   Standard_Real poles[4*(25+1)*(25+1)];
@@ -50,35 +47,7 @@ struct BSplSLib_DataContainer
   Standard_Real ders[48];
 };
 
-//=======================================================================
-//class : BSplSLib_LocalArray
-//purpose: Auxiliary class optimizing creation of array buffer for
-//         evaluation of bspline (using stack allocation for small arrays)
-//=======================================================================
-
-#define LOCARRAY_BUFFER 1024
-class BSplSLib_LocalArray 
-{
- public: 
-  BSplSLib_LocalArray (Standard_Integer Size)
-    : myPtr(myBuffer)
-  {
-    if ( Size > LOCARRAY_BUFFER )
-      myPtr = (Standard_Real*)Standard::Allocate (Size * sizeof(Standard_Real));
-  }
-
-  ~BSplSLib_LocalArray ()
-  {
-    if ( myPtr != myBuffer )
-      Standard::Free (*(Standard_Address*)&myPtr);
-  }
-
-  operator Standard_Real* () { return myPtr; }
-  
- private:
-  Standard_Real myBuffer[LOCARRAY_BUFFER];
-  Standard_Real* myPtr;
-};
+typedef PLib_LocalArray BSplSLib_LocalArray;
 
 //**************************************************************************
 //                     Evaluation methods
@@ -3317,7 +3286,7 @@ void BSplSLib::FunctionMultiply
 		      NewDenominator(ii,jj),
 		      NewNumerator(ii,jj)) ;
 	
-	Function(0,
+	(*const_cast <BSplSLib_EvaluatorFunction*> (&Function)).Evaluate (0,
 		 UParameters(ii),
 		 VParameters(jj),
 		 result,

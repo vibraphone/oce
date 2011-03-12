@@ -15,9 +15,9 @@
 //purpose  : 
 //=======================================================================
 
+static Handle(Message_Messenger) aMessenger = new Message_Messenger; //at file level for thread-safety
 const Handle(Message_Messenger)& Message::DefaultMessenger ()
 {
-  static Handle(Message_Messenger) aMessenger = new Message_Messenger;
   return aMessenger;
 }
 

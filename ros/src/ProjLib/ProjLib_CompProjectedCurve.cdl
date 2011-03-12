@@ -213,5 +213,6 @@ fields
   myVIso        :  HArray1OfBoolean          from  TColStd;
   mySnglPnts    :  HArray1OfBoolean          from  TColStd;    
   myMaxDistance :  HArray1OfReal             from  TColStd; 
+  TabInt        :  HArray1OfReal             from  TColStd;
         
 end CompProjectedCurve;

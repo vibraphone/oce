@@ -8,6 +8,7 @@
 #include <RWStl.ixx>	
 #include <OSD_Protection.hxx>
 #include <OSD_File.hxx>
+#include <Message_ProgressSentry.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <Standard_NoMoreObject.hxx>
 #include <Standard_TypeMismatch.hxx>
@@ -26,6 +27,8 @@ static const int HEADER_SIZE           =  84;
 static const int SIZEOF_STL_FACET      =  50; 
 static const int STL_MIN_FILE_SIZE     = 284; 
 static const int ASCII_LINES_PER_FACET =   7; 
+static const int IND_THRESHOLD         = 1000; //increment the indicator every 1000 triangles
+
 
 //=============== =======================================================
 //function : WriteInteger
@@ -108,7 +111,8 @@ inline static Standard_Real ReadFloat2Double(OSD_File &aFile)
 //purpose  : write a binary STL file in Little Endian format
 //=======================================================================
 
-Standard_Boolean RWStl::WriteBinary(const Handle(StlMesh_Mesh)& aMesh, const OSD_Path& aPath)
+Standard_Boolean RWStl::WriteBinary(const Handle(StlMesh_Mesh)& aMesh, const OSD_Path& aPath,
+                                    const Handle(Message_ProgressIndicator)& aProgInd)
 {
   
   OSD_File theFile = OSD_File (aPath);
@@ -131,8 +135,12 @@ Standard_Boolean RWStl::WriteBinary(const Handle(StlMesh_Mesh)& aMesh, const OSD
   int dum=0;
   StlMesh_MeshExplorer aMexp (aMesh);
   
-  
-  for (Standard_Integer nbd=1;nbd<=aMesh->NbDomains();nbd++) {
+  Standard_Integer aNbDomains = aMesh->NbDomains();
+  Message_ProgressSentry aDPS (aProgInd, "Mesh domains", 0, aNbDomains, 1);
+  for (Standard_Integer nbd=1;nbd<=aNbDomains && aDPS.More();nbd++, aDPS.Next()) {
+    Message_ProgressSentry aTPS (aProgInd, "Triangles", 0,
+        aMesh->NbTriangles (nbd), IND_THRESHOLD);
+    Standard_Integer aTriangleInd = 0;
     for (aMexp.InitTriangle (nbd); aMexp.MoreTriangle (); aMexp.NextTriangle ()) {
 	aMexp.TriangleVertices (x1,y1,z1,x2,y2,z2,x3,y3,z3);
 	//pgo	  aMexp.TriangleOrientation (x,y,z);
@@ -165,7 +173,10 @@ Standard_Boolean RWStl::WriteBinary(const Handle(StlMesh_Mesh)& aMesh, const OSD
 	WriteDouble2Float (theFile,z3);
 
 	theFile.Write (&dum,2);
-	
+	if (++aTriangleInd % IND_THRESHOLD == 0)
+          if (!aTPS.More())
+            break;
+          aTPS.Next();
       }
   }
   
@@ -177,11 +188,12 @@ Standard_Boolean RWStl::WriteBinary(const Handle(StlMesh_Mesh)& aMesh, const OSD
 //purpose  : write an ASCII STL file
 //=======================================================================
 
-Standard_Boolean RWStl::WriteAscii(const Handle(StlMesh_Mesh)& aMesh, const OSD_Path& aPath)
+Standard_Boolean RWStl::WriteAscii(const Handle(StlMesh_Mesh)& aMesh, const OSD_Path& aPath,
+                                   const Handle(Message_ProgressIndicator)& aProgInd)
 {
   OSD_File theFile = OSD_File (aPath);
   theFile.Build(OSD_WriteOnly,OSD_Protection());
-  TCollection_AsciiString buf = TCollection_AsciiString ("solid\n");
+  TCollection_AsciiString buf ("solid\n");
   theFile.Write (buf,buf.Length());buf.Clear();
   
   Standard_Real x1, y1, z1;
@@ -190,11 +202,15 @@ Standard_Boolean RWStl::WriteAscii(const Handle(StlMesh_Mesh)& aMesh, const OSD_
   
   //pgo  Standard_Real x,y,z;
   
-  char sval[16];
-  
+  char sval[512];
   StlMesh_MeshExplorer aMexp (aMesh);
   
-  for (Standard_Integer nbd=1;nbd<=aMesh->NbDomains();nbd++) {
+  Standard_Integer aNbDomains = aMesh->NbDomains();
+  Message_ProgressSentry aDPS (aProgInd, "Mesh domains", 0, aNbDomains, 1);
+  for (Standard_Integer nbd=1;nbd<=aNbDomains && aDPS.More();nbd++, aDPS.Next()) {
+    Message_ProgressSentry aTPS (aProgInd, "Triangles", 0,
+        aMesh->NbTriangles (nbd), IND_THRESHOLD);
+    Standard_Integer aTriangleInd = 0;
     for (aMexp.InitTriangle (nbd); aMexp.MoreTriangle (); aMexp.NextTriangle ()) {
       aMexp.TriangleVertices (x1,y1,z1,x2,y2,z2,x3,y3,z3);
       
@@ -212,62 +228,26 @@ Standard_Boolean RWStl::WriteAscii(const Handle(StlMesh_Mesh)& aMesh, const OSD_
 	// si Vnorm est quasi-nul, on le charge a 0 explicitement
 	Vnorm.SetCoord (0., 0., 0.);
       }
-      buf += " facet normal "; 
-      sprintf (sval,"% 12e",Vnorm.X());
+      sprintf (sval,
+          " facet normal % 12e % 12e % 12e\n"
+          "   outer loop\n"
+          "     vertex % 12e % 12e % 12e\n"
+          "     vertex % 12e % 12e % 12e\n"
+          "     vertex % 12e % 12e % 12e\n"
+          "   endloop\n"
+          " endfacet\n",
+          Vnorm.X(),Vnorm.Y(),Vnorm.Z(),
+          x1,y1,z1,x2,y2,z2,x3,y3,z3);
       buf += sval;
-      buf += " "; 
-      sprintf (sval,"% 12e",Vnorm.Y());
-      buf += sval;
-      buf += " "; 
-      sprintf (sval,"% 12e",Vnorm.Z());
-      buf += sval;
-      buf += '\n';
       theFile.Write (buf,buf.Length());buf.Clear();
-      buf += "   outer loop\n"; 
-      theFile.Write (buf,buf.Length());buf.Clear();
-      
-      buf += "     vertex "; 
-      sprintf (sval,"% 12e",x1);
-      buf += sval;
-      buf += " "; 
-      sprintf (sval,"% 12e",y1);
-      buf += sval;
-      buf += " "; 
-      sprintf (sval,"% 12e",z1);
-      buf += sval;
-      buf += '\n';
-      theFile.Write (buf,buf.Length());buf.Clear();
-      
-      buf += "     vertex "; 
-      sprintf (sval,"% 12e",x2);
-      buf += sval;
-      buf += " "; 
-      sprintf (sval,"% 12e",y2);
-      buf += sval;
-      buf += " "; 
-      sprintf (sval,"% 12e",z2);
-      buf += sval;
-      buf += '\n';
-      theFile.Write (buf,buf.Length());buf.Clear();
-      
-      buf += "     vertex "; 
-      sprintf (sval,"% 12e",x3);
-      buf += sval;
-      buf += " "; 
-      sprintf (sval,"% 12e",y3);
-      buf += sval;
-      buf += " "; 
-      sprintf (sval,"% 12e",z3);
-      buf += sval;
-      buf += '\n';
-      theFile.Write (buf,buf.Length());buf.Clear();
-      buf += "   endloop\n"; 
-      theFile.Write (buf,buf.Length());buf.Clear();
-      buf += " endfacet\n"; 
-      theFile.Write (buf,buf.Length());buf.Clear();
+      if (++aTriangleInd % IND_THRESHOLD == 0) {
+        if (!aTPS.More())
+            break;
+        aTPS.Next();
+
+      }
     }
   }
-  
   buf += "endsolid\n";
   theFile.Write (buf,buf.Length());buf.Clear();
   
@@ -280,7 +260,8 @@ Standard_Boolean RWStl::WriteAscii(const Handle(StlMesh_Mesh)& aMesh, const OSD_
 //Warning  : 
 //=======================================================================
 
-Handle_StlMesh_Mesh RWStl::ReadFile(const OSD_Path& aPath)
+Handle_StlMesh_Mesh RWStl::ReadFile(const OSD_Path& aPath,
+                                    const Handle(Message_ProgressIndicator)& aProgInd)
 {
   OSD_File file = OSD_File (aPath);
   file.Open(OSD_ReadOnly,OSD_Protection(OSD_RWD,OSD_RWD,OSD_RWD,OSD_RWD));
@@ -308,9 +289,9 @@ Handle_StlMesh_Mesh RWStl::ReadFile(const OSD_Path& aPath)
   file.Close();
   
   if (IsAscii) {
-    return RWStl::ReadAscii (aPath);
+    return RWStl::ReadAscii (aPath, aProgInd);
   } else {
-    return RWStl::ReadBinary (aPath);
+    return RWStl::ReadBinary (aPath, aProgInd);
   }
 }
 
@@ -320,7 +301,8 @@ Handle_StlMesh_Mesh RWStl::ReadFile(const OSD_Path& aPath)
 //Warning  : 
 //=======================================================================
 
-Handle_StlMesh_Mesh RWStl::ReadBinary(const OSD_Path& aPath)
+Handle_StlMesh_Mesh RWStl::ReadBinary(const OSD_Path& aPath,
+                                      const Handle(Message_ProgressIndicator)& /*aProgInd*/)
 {
   Standard_Integer NBFACET;
   Standard_Integer ifacet;
@@ -396,7 +378,8 @@ Handle_StlMesh_Mesh RWStl::ReadBinary(const OSD_Path& aPath)
 //Warning  : 
 //=======================================================================
 
-Handle_StlMesh_Mesh RWStl::ReadAscii(const OSD_Path& aPath)
+Handle_StlMesh_Mesh RWStl::ReadAscii(const OSD_Path& aPath,
+                                     const Handle(Message_ProgressIndicator)& aProgInd)
 {
   TCollection_AsciiString filename;
   long ipos;
@@ -443,7 +426,8 @@ Handle_StlMesh_Mesh RWStl::ReadAscii(const OSD_Path& aPath)
   ReadMesh->AddDomain();
 
   // main reading
-  for (iTri = 0; iTri < nbTris; ++iTri) {
+  Message_ProgressSentry aPS (aProgInd, "Triangles", 0, (nbTris - 1) *1. / IND_THRESHOLD, 1);
+  for (iTri = 0; iTri < nbTris && aPS.More();) {
     // reading the facet normal
     fscanf(file,"%*s %*s %f %f %f\n",&x[0],&y[0],&z[0]);
 
@@ -468,6 +452,8 @@ Handle_StlMesh_Mesh RWStl::ReadAscii(const OSD_Path& aPath)
     // skip the keywords "endfacet"
     fscanf(file,"%*s");
 
+    if (++iTri % IND_THRESHOLD == 0)
+        aPS.Next();
   }
 
   cout<< "end mesh\n"<<endl;

@@ -256,7 +256,7 @@ Standard_EXPORT ViewerTest_DoubleMapOfInteractiveAndName& GetMapOfAIS(){
 static TColStd_MapOfInteger theactivatedmodes(8);
 static TColStd_ListOfTransient theEventMgrs;
 
-static void VwrTst_InitEventMgr(const Handle(NIS_View)& aView,
+static void VwrTst_InitEventMgr(const Handle(V3d_View)& aView,
                                 const Handle(AIS_InteractiveContext)& Ctx)
 {
   theEventMgrs.Clear();
@@ -326,9 +326,7 @@ void ViewerTest::UnsetEventManager()
 
 void ViewerTest::ResetEventManager()
 {
-  const Handle(NIS_View) aView =
-    Handle(NIS_View)::DownCast(ViewerTest::CurrentView());
-  VwrTst_InitEventMgr(aView, ViewerTest::GetAISContext());
+  VwrTst_InitEventMgr(ViewerTest::CurrentView(), ViewerTest::GetAISContext());
 }
 
 Handle(ViewerTest_EventManager) ViewerTest::CurrentEventManager()

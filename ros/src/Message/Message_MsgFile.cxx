@@ -10,6 +10,7 @@
 #include <NCollection_DefineBaseCollection.hxx>
 #include <NCollection_DefineDataMap.hxx>
 #include <OSD_Environment.hxx>
+#include <Standard_Mutex.hxx>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -19,11 +20,8 @@ DEFINE_DATAMAP(Message_DataMapOfExtendedString,
                TCollection_AsciiString,
                TCollection_ExtendedString)
 
-static Message_DataMapOfExtendedString& msgsDataMap ()
-{
-  static Message_DataMapOfExtendedString aDataMap;
-  return aDataMap;
-}
+static Message_DataMapOfExtendedString TheDataMap;
+static Standard_Mutex TheMutex; //to protect TheDataMap
 
 typedef enum
 {
@@ -303,10 +301,10 @@ void  Message_MsgFile::LoadFromEnv
 Standard_Boolean Message_MsgFile::AddMsg (const TCollection_AsciiString& theKeyword,
 					  const TCollection_ExtendedString&  theMessage)
 {
-  Message_DataMapOfExtendedString& aDataMap = ::msgsDataMap();
-//  if (aDataMap.IsBound (theKeyword))
+  Standard_Mutex::Sentry aSentry (TheMutex);
+//  if (TheDataMap.IsBound (theKeyword))
 //    return Standard_False;
-  aDataMap.Bind (theKeyword, theMessage);
+  TheDataMap.Bind (theKeyword, theMessage);
   return Standard_True;
 }
 
@@ -328,17 +326,17 @@ const TCollection_ExtendedString &Message_MsgFile::Msg (const Standard_CString t
 
 const TCollection_ExtendedString &Message_MsgFile::Msg (const TCollection_AsciiString& theKeyword)
 {
+  Standard_Mutex::Sentry aSentry (TheMutex);
   // find message in the map
-  Message_DataMapOfExtendedString& aDataMap = ::msgsDataMap();
-  if (aDataMap.IsBound (theKeyword))
-    return aDataMap.Find (theKeyword);
+  if (TheDataMap.IsBound (theKeyword))
+    return TheDataMap.Find (theKeyword);
 
   // if not found, generate error message
   static const TCollection_ExtendedString aDefPrefix ("Unknown message invoked with the keyword: ");
   static const TCollection_AsciiString aPrefixCode ("Message_Msg_BadKeyword");
   static TCollection_ExtendedString aFailureMessage;
-  if (aDataMap.IsBound (aPrefixCode))
-    aFailureMessage = aDataMap.Find (aPrefixCode) + " " + theKeyword;
+  if (TheDataMap.IsBound (aPrefixCode))
+    aFailureMessage = TheDataMap.Find (aPrefixCode) + " " + theKeyword;
   else aFailureMessage = aDefPrefix + theKeyword;
   return aFailureMessage;
 }

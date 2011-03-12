@@ -343,7 +343,7 @@ Standard_Boolean BRepTools_Modifier::Rebuild
     if (ts == TopAbs_FACE) {
       // pcurves
       Handle(Geom2d_Curve) curve2d; //,curve2d1;
-      TopoDS_Face face = TopoDS::Face(S);
+      const TopoDS_Face& face = TopoDS::Face(S);
       TopAbs_Orientation fcor = face.Orientation();
       if(fcor != TopAbs_REVERSED) fcor = TopAbs_FORWARD;
 
@@ -355,6 +355,13 @@ Standard_Boolean BRepTools_Modifier::Rebuild
 	if (M->NewCurve2d(edge, face,TopoDS::Edge(myMap(ex.Current())),
 			  TopoDS::Face(result),curve2d, tol)) 
         {
+	  //save original range on pcurve to restore it later
+	  //otherwise non-same range edges will take wrong range
+	  Standard_Real aFOrig, aLOrig;
+	  BRep_Tool::Range (edge, face, aFOrig, aLOrig);
+
+	  const TopoDS_Edge& CurE = TopoDS::Edge(myMap(ex.Current()));
+	  const TopoDS_Face& CurF = TopoDS::Face(result);
 	  // rem dub 16/09/97 : On fait de la topologie constante ou on
 	  // n'en fait pas.
 	  // On n'en fait pas si CopySurface = 1
@@ -427,6 +434,8 @@ Standard_Boolean BRepTools_Modifier::Rebuild
 			 curve2d,
 			 TopoDS::Face(result), 0.);
 	  }
+	  //restore original range which was reset by BRep_Builder::UpdateEdge()
+	  B.Range (CurE, CurF, aFOrig, aLOrig);
 
 	  TopLoc_Location theLoc;
 	  Standard_Real theF,theL;

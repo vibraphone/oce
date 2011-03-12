@@ -12,7 +12,7 @@
 //purpose  : Initialize for a deferred interference.
 //=======================================================================
 
-static Standard_Integer debug=0;
+static const Standard_Integer debug=0;
 
 Intf_Interference::Intf_Interference (const Standard_Boolean Self)
      : SelfIntf(Self)

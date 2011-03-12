@@ -34,10 +34,30 @@
 
 #include <Plate_Plate.hxx>
 
-static Handle(Geom_Surface) fonct = NULL; 
+class GeomPlate_MakeApprox_Eval : public AdvApp2Var_EvaluatorFunc2Var
+{
+public:
+  GeomPlate_MakeApprox_Eval (const Handle(Geom_Surface)& thefonct) :
+    fonct (thefonct) {}
+
+  virtual void Evaluate (Standard_Integer * Dimension,
+					     Standard_Real    * UStartEnd,
+					     Standard_Real    * VStartEnd,
+					     Standard_Integer * FavorIso,
+					     Standard_Real    * ConstParam,
+				         Standard_Integer * NbParams,
+				         Standard_Real    * Parameters,
+				         Standard_Integer * UOrder,
+				         Standard_Integer * VOrder,
+				         Standard_Real    * Result,
+				         Standard_Integer * ErrorCode);
+
+private:
+  Handle(Geom_Surface) fonct; 
+};
 
 
-extern "C" void myPlateSurfEval(Standard_Integer * Dimension,
+void GeomPlate_MakeApprox_Eval::Evaluate (Standard_Integer * Dimension,
 		    	        // Dimension
 			        Standard_Real    * UStartEnd,
 				// StartEnd[2] in U
@@ -228,7 +248,7 @@ GeomPlate_MakeApprox::GeomPlate_MakeApprox(const Handle(GeomPlate_Surface)& Surf
 					   const Standard_Real EnlargeCoeff)
 {
   myPlate = SurfPlate;
-  fonct = myPlate;
+  Handle(Geom_Surface) fonct = myPlate;
 
   Standard_Real U0=0., U1=0., V0=0., V1=0.;
   myPlate->RealBounds(U0, U1, V0, V1);
@@ -256,7 +276,7 @@ GeomPlate_MakeApprox::GeomPlate_MakeApprox(const Handle(GeomPlate_Surface)& Surf
   AdvApprox_DichoCutting myDec;
 
 //POP pour WNT
-  AdvApp2Var_EvaluatorFunc2Var ev = myPlateSurfEval;
+  GeomPlate_MakeApprox_Eval ev (fonct);
   AdvApp2Var_ApproxAFunc2Var AppPlate(nb1, nb2, nb3,
 			              nul1,nul1,eps3D,
 				      nul2,nul2,epsfr,
@@ -293,7 +313,7 @@ GeomPlate_MakeApprox::GeomPlate_MakeApprox(const Handle(GeomPlate_Surface)& Surf
 					   const Standard_Real EnlargeCoeff)
 {
   myPlate = SurfPlate;
-  fonct = myPlate;
+  Handle(Geom_Surface) fonct = myPlate;
 
   TColgp_SequenceOfXY Seq2d;
   TColgp_SequenceOfXYZ Seq3d;
@@ -367,7 +387,7 @@ GeomPlate_MakeApprox::GeomPlate_MakeApprox(const Handle(GeomPlate_Surface)& Surf
   if (CritOrder==-1) {
     myPrec = 1;
 // POP pour NT
-    AdvApp2Var_EvaluatorFunc2Var ev = myPlateSurfEval;
+    GeomPlate_MakeApprox_Eval ev (fonct);
     AdvApp2Var_ApproxAFunc2Var AppPlate(nb1, nb2, nb3,
 					nul1,nul1,eps3D,
 					nul2,nul2,epsfr,
@@ -388,7 +408,7 @@ GeomPlate_MakeApprox::GeomPlate_MakeApprox(const Handle(GeomPlate_Surface)& Surf
   else if (CritOrder==0) {
     GeomPlate_PlateG0Criterion Crit0(Seq2d,Seq3d,seuil);
 // POP pour NT
-    AdvApp2Var_EvaluatorFunc2Var ev = myPlateSurfEval;
+    GeomPlate_MakeApprox_Eval ev (fonct);
     AdvApp2Var_ApproxAFunc2Var AppPlate(nb1, nb2, nb3,
 					nul1,nul1,eps3D,
 					nul2,nul2,epsfr,
@@ -411,7 +431,7 @@ GeomPlate_MakeApprox::GeomPlate_MakeApprox(const Handle(GeomPlate_Surface)& Surf
   else if (CritOrder==1) {
     GeomPlate_PlateG1Criterion Crit1(Seq2d,Seq3d,seuil);
 // POP pour NT
-    AdvApp2Var_EvaluatorFunc2Var ev = myPlateSurfEval;
+    GeomPlate_MakeApprox_Eval ev (fonct);
     AdvApp2Var_ApproxAFunc2Var AppPlate(nb1, nb2, nb3,
 					nul1,nul1,eps3D,
 					nul2,nul2,epsfr,

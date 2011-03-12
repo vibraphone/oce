@@ -31,8 +31,8 @@
 
 //#define TRANSLOG   // debug
 
-static Handle(Standard_Transient)  nultrans;   // pour retour const&(Null) ...
-static Handle(Transfer_Binder)     nulbinder;
+static const Handle(Standard_Transient)  nultrans;   // pour retour const&(Null) ...
+static const Handle(Transfer_Binder)     nulbinder;
 
 
 //=======================================================================
@@ -49,7 +49,6 @@ Transfer_TransferProcess::Transfer_TransferProcess (const Standard_Integer nb)
   themessenger = Message::DefaultMessenger();
   thetrace = 0;
 //  theroots = new TColStd_HSequenceOfInteger ();
-  theindex = 0;
 }
 
 
@@ -68,7 +67,6 @@ Transfer_TransferProcess::Transfer_TransferProcess(const Handle(Message_Messenge
   SetMessenger (messenger);
   thetrace = 1;
 //  theroots = new TColStd_HSequenceOfInteger ();
-  theindex = 0;
 }
 
     void Transfer_TransferProcess::Clear ()
@@ -76,7 +74,6 @@ Transfer_TransferProcess::Transfer_TransferProcess(const Handle(Message_Messenge
   thelevel = 0;     therootl  = 0;
   theroots.Clear();
   themap.Clear();
-  theindex = 0;  thelastobj.Nullify();  thelastbnd.Nullify();
 }
 
     void Transfer_TransferProcess::Clean ()
@@ -109,11 +106,6 @@ Transfer_TransferProcess::Transfer_TransferProcess(const Handle(Message_Messenge
   }
   theroots.Clear();
   theroots = aNewRoots;
-
-//    Le reste : nettoyage
-  thelastobj.Nullify();
-  thelastbnd.Nullify();
-  theindex = 0;
 }
 
 
@@ -168,21 +160,11 @@ Handle(Transfer_Actor)  Transfer_TransferProcess::Actor () const
 //purpose  : 
 //=======================================================================
 
-Handle(Transfer_Binder) Transfer_TransferProcess::Find (const TheStart& start) const
+const Handle(Transfer_Binder)& Transfer_TransferProcess::Find (const TheStart& start) const
 //							 const Standard_Integer categ) const
 {
-  if (thelastobj == start) {
-    //if (theindex > 0) return thelastbnd->Search(categ); //skl
-    if (theindex > 0) return thelastbnd; //skl
-  }
   Standard_Integer index = themap.FindIndex (start);
-  if (index > 0) {
-    const Handle(Transfer_Binder)& binder = themap.FindFromIndex(index);
-    //if (binder.IsNull()) //skl
-    return binder;
-    //return binder->Search(categ); //skl
-  }
-  return nulbinder;
+  return (index > 0 ? themap.FindFromIndex(index) : nulbinder);
 }
 
 //        ##    ##    IsBound    ##    ##
@@ -195,9 +177,8 @@ Handle(Transfer_Binder) Transfer_TransferProcess::Find (const TheStart& start) c
 Standard_Boolean  Transfer_TransferProcess::IsBound(const TheStart& start) const
 //						    const Standard_Integer categ) const
 {
-  Handle(Transfer_Binder) binder = Find(start); //,categ); skl
-  if (binder.IsNull()) return Standard_False;
-  return binder->HasResult();
+  const Handle(Transfer_Binder)& binder = Find(start); //,categ); skl
+  return (!binder.IsNull() && binder->HasResult());
 }
 
 //        ##    ##    IsAlreadyUsed    ##    ##
@@ -210,7 +191,7 @@ Standard_Boolean  Transfer_TransferProcess::IsBound(const TheStart& start) const
 Standard_Boolean Transfer_TransferProcess::IsAlreadyUsed(const TheStart& start) const
 //							 const Standard_Integer categ) const
 {
-  Handle(Transfer_Binder) binder = Find(start); //,categ); skl
+  const Handle(Transfer_Binder)& binder = Find(start); //,categ); skl
   if (binder.IsNull()) {
     StartTrace (binder,start,thelevel,4);
     Transfer_TransferFailure::Raise
@@ -219,28 +200,6 @@ Standard_Boolean Transfer_TransferProcess::IsAlreadyUsed(const TheStart& start) 
   return (binder->Status() == Transfer_StatusUsed);
 }
 
-
-//        ##    ##    FindAndMask (private)    ##    ##
-
-//=======================================================================
-//function : FindAndMask
-//purpose  : 
-//=======================================================================
-
-Handle(Transfer_Binder) Transfer_TransferProcess::FindAndMask(const TheStart& start)
-//							      const Standard_Integer categ)
-{
-  if (thelastobj == start) {
-    if (theindex > 0) return thelastbnd; //skl ->Search(categ);
-  }
-  thelastobj = start;
-  theindex   = themap.FindIndex (start);
-  if (theindex > 0) thelastbnd = themap.FindFromIndex(theindex);
-  else thelastbnd.Nullify();
-  //if (thelastbnd.IsNull()) skl
-  return thelastbnd;
-  //return thelastbnd->Search(categ); //skl
-}
 
 
 //  ##    ##    ##               Modifications               ##    ##    ##
@@ -256,42 +215,27 @@ void Transfer_TransferProcess::Bind (const TheStart& start,
 //				      const Standard_Integer categ)
 {
   if (binder.IsNull()) return;
-  Handle(Transfer_Binder) former = FindAndMask(start);//,categ);skl
-  if (!former.IsNull()) {
-//  On admet VoidBinder : alors on reprend son Check
-    if (former->DynamicType() == STANDARD_TYPE(Transfer_VoidBinder)) {
-      binder->Merge(former);
-      //binder->SetCategory(categ); //skl
-      themap(theindex) = binder;                          // Substitution
+  Standard_Integer index = themap.FindIndex (start);
+  if (index) {
+    const Handle(Transfer_Binder)& former = themap.FindFromIndex(index);
+    if (!former.IsNull()) {
+      //  On admet VoidBinder : alors on reprend son Check
+      if (former->IsKind (STANDARD_TYPE(Transfer_VoidBinder))) {
+        binder->Merge(former);
+      }
+      else if (former->Status() == Transfer_StatusUsed) {
+        StartTrace (former,start,thelevel,4);
+        Transfer_TransferFailure::Raise("TransferProcess : Bind, already Bound");
+      }
+      else {
+        if (thetrace > 2) StartTrace (former,start,thelevel,5);
+        binder->CCheck()->GetMessages (former->Check());
+      }
     }
-    else if (former->Status() == Transfer_StatusUsed) {
-      StartTrace (former,start,thelevel,4);
-      Transfer_TransferFailure::Raise
-	("TransferProcess : Bind, already Bound");
-    }
-    else {
-      if (thetrace > 2) StartTrace (former,start,thelevel,5);
-      binder->CCheck()->GetMessages (former->Check());
-    }
-  }
-  //binder->SetCategory(categ); //skl
-  if (theindex == 0 || thelastbnd.IsNull()) {
-    if (theindex == 0) theindex = themap.Add(start,binder);  // Nouveau
-    else themap(theindex) = binder;                          // idem en fait
-    thelastbnd = binder;
-  }
-  else { //skl
-    //binder->AddResult(thelastbnd);
-    thelastbnd  = binder;
-    themap(theindex) = binder;
-  }
-/*skl else if (thelastbnd->Category() == categ) {   // Substitue cette categorie
-    binder->Next(Standard_False)->SetNext(thelastbnd->Next(Standard_True),Standard_True);
-    thelastbnd  = binder;
-    themap(theindex) = binder;
+    themap(index) = binder; //Substitution
   } else {
-    thelastbnd->AddNext (binder,categ,Standard_True);
-  } */
+    index = themap.Add(start,binder); //New
+  }
 }
 
 
@@ -321,27 +265,24 @@ void  Transfer_TransferProcess::Rebind (const TheStart& start,
 Standard_Boolean Transfer_TransferProcess::Unbind(const TheStart& start)
 //						   const Standard_Integer categ)
 {
-  Handle(Transfer_Binder) former = FindAndMask(start);//,categ);skl
-  if (theindex == 0) return Standard_False;
-  if (former.IsNull()) return Standard_False;
-  if (former->DynamicType() == STANDARD_TYPE(Transfer_VoidBinder)) return Standard_True;
-  //const Interface_Check& ach = thelastbnd->Check();
-  //Handle(Transfer_Binder) newbinder = thelastbnd->RemoveNext(categ);skl
-  //if (newbinder != thelastbnd)skl
-    themap(theindex) = thelastbnd;// = newbinder;skl
-  if(theroots.Contains(theindex)) {
+  Standard_Integer index = themap.FindIndex (start);
+  if (!index) return Standard_False;
+  const Handle(Transfer_Binder)& former = themap.FindFromIndex(index);
+  if (former->IsKind (STANDARD_TYPE(Transfer_VoidBinder))) return Standard_True;
+  themap(index) = nulbinder; //replace in the map with a null
+
+  if(theroots.Contains(index)) {
+    //remove index from theroots
     TColStd_IndexedMapOfInteger aNewRoots;
-    for(Standard_Integer i = 1; i <= theroots.Extent(); i++)
-      if(theindex!= theroots.FindKey(i))
-	aNewRoots.Add(theroots.FindKey(i));
+    for(Standard_Integer i = 1; i <= theroots.Extent(); i++) {
+        Standard_Integer aRootIndex = theroots.FindKey(i);
+        if(index!= aRootIndex)
+          aNewRoots.Add(aRootIndex);
+    }
     
     theroots.Clear();
     theroots = aNewRoots;
   }
-
-  thelastobj.Nullify();
-  thelastbnd.Nullify();
-  theindex = 0;
   return Standard_True;
 }
 
@@ -354,7 +295,7 @@ Standard_Boolean Transfer_TransferProcess::Unbind(const TheStart& start)
 Handle(Transfer_Binder) Transfer_TransferProcess::FindElseBind(const TheStart& start)
 //							       const Standard_Integer categ)
 {
-  Handle(Transfer_Binder) binder = FindAndMask (start);//,categ);skl
+  Handle(Transfer_Binder) binder = Find (start);//,categ);skl
   if (!binder.IsNull()) return binder;
   binder = new Transfer_VoidBinder;
   Bind(start,binder);//,categ);skl
@@ -439,7 +380,7 @@ void  Transfer_TransferProcess::SendWarning(const TheStart& start,
 void  Transfer_TransferProcess::SendMsg(const TheStart& start,
 					const Message_Msg& amsg)
 {
-  Handle(Transfer_Binder) binder = FindAndMask(start);
+  Handle(Transfer_Binder) binder = Find(start);
   if (binder.IsNull()) {
     binder = new Transfer_VoidBinder;
     Bind (start,binder);
@@ -464,7 +405,7 @@ void Transfer_TransferProcess::AddFail(const TheStart& start,
 				       const Standard_CString mess,
 				       const Standard_CString orig)
 {
-  Handle(Transfer_Binder) binder = FindAndMask(start);
+  Handle(Transfer_Binder) binder = Find(start);
   if (binder.IsNull()) {
     binder = new Transfer_VoidBinder;
     Bind (start,binder);
@@ -515,7 +456,7 @@ void Transfer_TransferProcess::AddWarning(const TheStart& start,
 					  const Standard_CString mess,
 					  const Standard_CString orig)
 {
-  Handle(Transfer_Binder) binder = FindAndMask(start);
+  Handle(Transfer_Binder) binder = Find(start);
   if (binder.IsNull()) {
     binder = new Transfer_VoidBinder;
     Bind (start,binder);
@@ -552,7 +493,7 @@ void Transfer_TransferProcess::AddWarning(const TheStart& start,
 void  Transfer_TransferProcess::Mend(const TheStart& start,
 				     const Standard_CString pref)
 {
-  Handle(Transfer_Binder) binder = FindAndMask(start);
+  Handle(Transfer_Binder) binder = Find(start);
   if (binder.IsNull()) return;  // rien a faire ...
   Handle(Interface_Check) ach =  binder->CCheck();
   ach->Mend (pref);
@@ -585,7 +526,7 @@ void Transfer_TransferProcess::AddCaseName(const TheStart& start,
 void Transfer_TransferProcess::AddCaseValue(const TheStart& start,
 					    const Handle(Standard_Transient)& caseval)
 {
-  Handle(Transfer_Binder) binder = FindAndMask(start);
+  Handle(Transfer_Binder) binder = Find(start);
   if (binder.IsNull()) {
     binder = new Transfer_VoidBinder;
     Bind (start,binder);
@@ -719,10 +660,10 @@ const Handle(Standard_Transient)& Transfer_TransferProcess::FindTransient
 void Transfer_TransferProcess::BindMultiple(const TheStart& start)
 //					    const Standard_Integer categ)
 {
-  Handle(Transfer_Binder) binder = FindAndMask (start);//,categ);skl
+  Handle(Transfer_Binder) binder = Find (start);//,categ);skl
   if (!binder.IsNull()) {
     if (!binder->IsKind(STANDARD_TYPE(Transfer_MultipleBinder))) {
-      StartTrace (thelastbnd,start,thelevel,4);
+      StartTrace (binder,start,thelevel,4);
       Transfer_TransferFailure::Raise ("TransferProcess : BindMultiple");
     }
   }
@@ -739,7 +680,7 @@ void Transfer_TransferProcess::AddMultiple(const TheStart& start,
 					   const Handle(Standard_Transient)& res)
 //					   const Standard_Integer categ)
 {
-  Handle(Transfer_Binder) binder = FindAndMask(start);//,categ);skl
+  Handle(Transfer_Binder) binder = Find(start);//,categ);skl
   Handle(Transfer_MultipleBinder) multr =
     Handle(Transfer_MultipleBinder)::DownCast(binder);
   if (multr.IsNull()) {
@@ -985,7 +926,7 @@ Standard_Boolean  Transfer_TransferProcess::Recognize(const TheStart& start) con
 Handle(Transfer_Binder) Transfer_TransferProcess::Transferring(const TheStart& start)
 {
   //   Map deja alimentee ?
-  Handle(Transfer_Binder) former = FindAndMask(start);
+  Handle(Transfer_Binder) former = Find(start);
 
   //  ....    Transfert deja effectue avec Resultat ?    ....
 
@@ -996,50 +937,44 @@ Handle(Transfer_Binder) Transfer_TransferProcess::Transferring(const TheStart& s
       former->SetAlreadyUsed();
       return former;
     }
-  //}
 
     //  ....    Etat Initial : peut-etre deja fait ... ou infaisable !
 
-  //if (!former.IsNull()) {
     Transfer_StatusExec statex = former->StatusExec();
     switch (statex) {
-      case Transfer_StatusInitial :               // Transfert prepare a faire
-	break;
-      case Transfer_StatusDone :                  // Transfert deja fait
+    case Transfer_StatusInitial :               // Transfert prepare a faire
+      break;
+    case Transfer_StatusDone :                  // Transfert deja fait
 //#ifdef TRANSLOG
-	themessenger << " .. and Transfer done" << endl;
+      themessenger << " .. and Transfer done" << endl;
 //#endif
-//	if (former->HasResult()) former->SetAlreadyUsed();
-	return former;
-      case Transfer_StatusRun :                   // ca y est, on boucle
-	former->SetStatusExec(Transfer_StatusLoop);
-	return former;
-      case Transfer_StatusError :                 // pas propre, ca ...
-	if (thetrace) {
-	  themessenger << "                  *** Transfer in Error Status  :" << endl;
-	  StartTrace (former, start, thelevel,0);
-//	  (*themessenger->Out()) << flush;
-	}
-	else StartTrace (former, start,thelevel,4);
-	Transfer_TransferFailure::Raise
-	  ("TransferProcess : Transfer in Error Status");
-      case Transfer_StatusLoop :                  // la boucle est bouclee ...
-	if (thetrace) {
-	  themessenger << "                  *** Transfer  Head of Dead Loop  :" << endl;
-	  StartTrace (former, start, thelevel,0);
-//	  (*themessenger->Out()) << flush;
-	}
-	else StartTrace (former, start,thelevel,4);
-	Transfer_TransferDeadLoop::Raise
-	  ("TransferProcess : Transfer at Head of a Dead Loop");
+      // if (former->HasResult()) former->SetAlreadyUsed();
+      return former;
+    case Transfer_StatusRun :                   // ca y est, on boucle
+      former->SetStatusExec(Transfer_StatusLoop);
+      return former;
+    case Transfer_StatusError :                 // pas propre, ca ...
+      if (thetrace) {
+        themessenger << "                  *** Transfer in Error Status  :" << endl;
+        StartTrace (former, start, thelevel,0);
+        //  (*themessenger->Out()) << flush;
+      }
+      else StartTrace (former, start,thelevel,4);
+      Transfer_TransferFailure::Raise ("TransferProcess : Transfer in Error Status");
+    case Transfer_StatusLoop :                  // la boucle est bouclee ...
+      if (thetrace) {
+        themessenger << "                  *** Transfer  Head of Dead Loop  :" << endl;
+        StartTrace (former, start, thelevel,0);
+        //  (*themessenger->Out()) << flush;
+      }
+      else StartTrace (former, start,thelevel,4);
+      Transfer_TransferDeadLoop::Raise ("TransferProcess : Transfer at Head of a Dead Loop");
     }
 #ifdef TRANSLOG
     cout << "Transfer,level "<<thelevel<<Message_Flush;
 #endif
-  //}
 
-  //  ....    OK, on peut lancer l Execution
-  //if (!former.IsNull()) 
+    //  ....    OK, on peut lancer l Execution
     former->SetStatusExec(Transfer_StatusRun);
   }
 #ifdef TRANSLOG
@@ -1059,60 +994,59 @@ Handle(Transfer_Binder) Transfer_TransferProcess::Transferring(const TheStart& s
     //    ...  Exceptions a Rattraper : elles ne se ressemblent pas toutes ... !
     catch (Transfer_TransferDeadLoop) {
       if (binder.IsNull()) {
-	themessenger << "                  *** Dead Loop with no Result" << endl;
-	if (thetrace) StartTrace (binder, start, thelevel-1,0);
-	binder = new Transfer_VoidBinder;
-	Bind (start,binder);  newbind = Standard_True;
+        themessenger << "                  *** Dead Loop with no Result" << endl;
+        if (thetrace) StartTrace (binder, start, thelevel-1,0);
+        binder = new Transfer_VoidBinder;
+        Bind (start,binder);  newbind = Standard_True;
       } else if (binder->StatusExec() == Transfer_StatusLoop) {
-	if (thetrace) {
-	  themessenger << "                  *** Dead Loop : Finding head of Loop :" << endl;
-	  StartTrace (binder, start, thelevel-1,0);
-	}
-	else StartTrace (binder, start,thelevel-1,4);
-	Transfer_TransferFailure::Raise("TransferProcess : Head of Dead Loop");
-// Autrement dit, on change d exception (on est sorti de la boucle)
+        if (thetrace) {
+          themessenger << "                  *** Dead Loop : Finding head of Loop :" << endl;
+          StartTrace (binder, start, thelevel-1,0);
+        }
+        else StartTrace (binder, start,thelevel-1,4);
+        Transfer_TransferFailure::Raise("TransferProcess : Head of Dead Loop");
+        // Autrement dit, on change d exception (on est sorti de la boucle)
       } else {
-	if (thetrace) {
-	  themessenger << "                  *** Dead Loop : Actor in Loop :" << endl;
-	  StartTrace (binder, start, thelevel-1,0);
-	}
+        if (thetrace) {
+          themessenger << "                  *** Dead Loop : Actor in Loop :" << endl;
+          StartTrace (binder, start, thelevel-1,0);
+        }
       }
       binder->AddFail("Transfer in dead Loop");
       thelevel = oldlev;
     }
     catch (Standard_Failure) {
       if (binder.IsNull()) {
-	themessenger << "                  *** Exception Raised with no Result" << endl;
-	binder = new Transfer_VoidBinder;
-	Bind (start,binder);  newbind = Standard_True;
+        themessenger << "                  *** Exception Raised with no Result" << endl;
+        binder = new Transfer_VoidBinder;
+        Bind (start,binder);  newbind = Standard_True;
       }
       binder->AddFail("Transfer stopped by exception raising");
       if (thetrace) {
-	themessenger << "    *** Raised : " << Standard_Failure::Caught()->GetMessageString() << endl;
-	StartTrace (binder, start, thelevel-1,4);
+        themessenger << "    *** Raised : " << Standard_Failure::Caught()->GetMessageString() << endl;
+        StartTrace (binder, start, thelevel-1,4);
       }
       thelevel = oldlev;
     }
   }
-
-//   Transfert non protege (ainsi, dbx a la main en cas de plantage par Raise)
+  //   Transfert non protege (ainsi, dbx a la main en cas de plantage par Raise)
   else  binder = TransferProduct(start);
 
-//  ....                Conclusion : Noter dans la Map                ....
+  //  ....                Conclusion : Noter dans la Map                ....
 
   if (!newbind && !binder.IsNull()) {
     if (former.IsNull()) {
-//    Peut-etre <theactor> a fait lui meme Bind ... verifier sinon le faire
+      //    Peut-etre <theactor> a fait lui meme Bind ... verifier sinon le faire
       if (!IsBound(start)) Bind(start,binder);     // resultat = categorie 0
       else {                                       // gka TRJ9 for writing SDR for solid
-// 	Handle(Transfer_Binder) tmpbind = Find(start);
-// 	if(!Contains(binder,tmpbind))
-// 	   binder->AddResult(tmpbind);
- 	Rebind(start,binder); // test_pattern.sat
+        // Handle(Transfer_Binder) tmpbind = Find(start);
+        // if(!Contains(binder,tmpbind))
+        //   binder->AddResult(tmpbind);
+        Rebind(start,binder); // test_pattern.sat
       }
     }
     else Rebind(start,binder);
-//  (du coup, <thelastbnd> vaut <binder>)
+    //  (du coup, <thelastbnd> vaut <binder>)
 #ifdef TRANSLOG
     cout << " ... OK" << endl;
 #endif
@@ -1132,7 +1066,7 @@ Handle(Transfer_Binder) Transfer_TransferProcess::Transferring(const TheStart& s
       SetRoot (start);
     }
   }
-  return thelastbnd;
+  return binder;
 }
 
 //  ##    ##        TransferProduct : Action proprement dite        ##    ##

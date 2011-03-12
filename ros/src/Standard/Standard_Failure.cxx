@@ -164,6 +164,9 @@ void Standard_Failure::Jump() const
 void Standard_Failure::Throw() const
 {
 #ifndef NO_CXX_EXCEPTION
+#ifdef DEB
+  Print (std::cerr);
+#endif
   throw *this;
 #endif
 }

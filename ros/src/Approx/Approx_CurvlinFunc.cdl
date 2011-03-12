@@ -141,6 +141,9 @@ fields
     myLength1:  Real      from  Standard;
     myLength2:  Real      from  Standard;
     myTolLen :  Real      from  Standard;
+    myPrevS  :  Real      from  Standard;
+    myPrevU  :  Real      from  Standard;
+
      
     myUi_1   :  HArray1OfReal  from  TColStd;
     mySi_1   :  HArray1OfReal  from  TColStd;

@@ -365,6 +365,7 @@ void  TopTools_ShapeSet::Dump(Standard_OStream& OS)const
   // dump the shapes
   //-----------------------------------------
 
+  int  prec = OS.precision(17);
   Standard_Integer i, nbShapes = myShapes.Extent();
   
   OS << "\nDump of " << nbShapes << " TShapes";
@@ -424,6 +425,7 @@ void  TopTools_ShapeSet::Dump(Standard_OStream& OS)const
   myLocations.Dump(OS);
 
   OS << endl;
+  OS.precision(prec);
 }
 
 
@@ -444,7 +446,7 @@ void  TopTools_ShapeSet::Write(Standard_OStream& OS)
   // on positionne LC_NUMERIC a "C" (point decimal)
   setlocale(LC_NUMERIC, "C") ;
 
-  int  prec = OS.precision(15);
+  int  prec = OS.precision(17);
 
   // write the copyright
   if (myFormatNb == 2)

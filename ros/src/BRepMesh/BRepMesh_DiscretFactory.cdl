@@ -14,7 +14,8 @@ uses
     PDiscretRoot from BRepMesh, 
     MapOfAsciiString from TColStd, 
     FactoryError from BRepMesh,
-    Shape from TopoDS  
+    Shape from TopoDS,
+    MapOfFunctions from Plugin
 --raises
 
 
@@ -66,6 +67,7 @@ fields
     myFixedNames  : AsciiString from TCollection[1] is protected; 
     myDefaultName : AsciiString from TCollection is protected; 
     myFunctionName: AsciiString from TCollection is protected; 
+    myFactoryMethods: MapOfFunctions from Plugin is protected;
      
 end DiscretFactory;
 

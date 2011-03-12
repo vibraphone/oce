@@ -86,7 +86,7 @@ inline Standard_Boolean IsSimilar(const Standard_CString One
 inline Standard_Boolean IsEqual(const Standard_CString One
 			       ,const Standard_CString Two)
 { 
-  return (One == Two);
+  return !strcmp (One, Two);
 }
 
 //============================================================================

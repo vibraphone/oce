@@ -136,27 +136,31 @@ BRepMesh_PDiscretRoot&
     myPDiscret->SetShape(theShape);
   }
   else {
-    Standard_Integer iErr;
-    TCollection_AsciiString aLibName;
-    OSD_Function aF;
-    //
     myPDiscret=NULL;
-    //
-    MakeLibName(myDefaultName, aLibName);
-    //
-    OSD_SharedLibrary aSL(aLibName.ToCString());
-    if (!aSL.DlOpen(OSD_RTLD_LAZY)) {
-      myErrorStatus=BRepMesh_FE_LIBRARYNOTFOUND; // library is not found  
-      return myPDiscret;
+    OSD_Function aF;
+    if (myFactoryMethods.IsBound (myDefaultName)) {
+      aF = myFactoryMethods (myDefaultName);
+    } else {
+      //Standard_Integer iErr;
+      TCollection_AsciiString aLibName;
+      //
+      MakeLibName(myDefaultName, aLibName);
+      //
+      OSD_SharedLibrary aSL(aLibName.ToCString());
+      if (!aSL.DlOpen(OSD_RTLD_LAZY)) {
+        myErrorStatus=BRepMesh_FE_LIBRARYNOTFOUND; // library is not found  
+        return myPDiscret;
+      }
+      //
+      aF = aSL.DlSymb(myFunctionName.ToCString());
+      myFactoryMethods.Bind (myDefaultName, aF);
     }
-    //
-    aF = aSL.DlSymb(myFunctionName.ToCString());
     if(aF==NULL ) {
       myErrorStatus=BRepMesh_FE_FUNCTIONNOTFOUND; // function is not found  
       return myPDiscret;
     }
     //
-    iErr=CreateDiscret(theShape,
+    Standard_Integer iErr = CreateDiscret(theShape,
 		       theDeflection,
 		       theAngle,
 		       aF,

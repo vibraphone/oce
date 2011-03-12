@@ -18,8 +18,7 @@
 #include <TColStd_ListIteratorOfListOfInteger.hxx>
 #include <Bnd_BoundSortBox.hxx>
 
-//static Pourcent3[9]={0,1,2,0,1,2,0,1,2};
-static int Pourcent3[9]={0,1,2,0,1,2,0,1,2};
+static const int Pourcent3[9]={0,1,2,0,1,2,0,1,2};
 
 
 //=======================================================================
@@ -36,7 +35,7 @@ Intf_InterferencePolyhedron::Intf_InterferencePolyhedron  ()
 //purpose  : 
 //=======================================================================
 
-static  Standard_Integer debug=0;
+static const Standard_Integer debug=0;
 
 Intf_InterferencePolyhedron::Intf_InterferencePolyhedron 
   (const Polyhedron1& FirstPol, const Polyhedron2& SeconPol)
@@ -108,8 +107,6 @@ void Intf_InterferencePolyhedron::Perform
 //purpose  : 
 //=======================================================================
 
-static Standard_Integer iFirst, iSecon;
-
 void Intf_InterferencePolyhedron::Interference 
   (const Polyhedron1&)
 {}
@@ -120,6 +117,7 @@ void Intf_InterferencePolyhedron::Interference
   Standard_Boolean  gridOnFirst=Standard_True;
   Standard_Integer  NbTrianglesFirstPol  = ToolPolyhe1::NbTriangles(FirstPol);
   Standard_Integer  NbTrianglesSecondPol = ToolPolyhe2::NbTriangles(SeconPol);  
+  Standard_Integer iFirst, iSecon;
 
   //------------------------------------------------------------------------------------------
   //-- the same number of triangles it is necessary to test better on
@@ -195,18 +193,6 @@ void Intf_InterferencePolyhedron::Interference
 //function : Intersect
 //purpose  : Intersection of two triangles issue from two Polyhedron.
 //=======================================================================
-
-void CoupleCharacteristics(const Polyhedron1& FirstPol,
-			   const Polyhedron2& SeconPol);
-
-static Standard_Integer OI[3];      // index des sommets de l objet
-static Standard_Integer TI[3];      // index des sommets du tool
-static Standard_Real dpOpT[3][3];   // distance point Objet - point Tool
-static Standard_Real dpOeT[3][3];   // distance point Objet - edge  Tool
-static Standard_Real deOpT[3][3];   // distance edge  Objet - point Tool
-static gp_XYZ voo[3];               // vecteur point point Obje
-static gp_XYZ vtt[3];               // vecteur point point Tool
-static Standard_Real Incidence;    // angle entre les deux plans
 
 void Intf_InterferencePolyhedron::Intersect 
 (const Standard_Integer Tri1, const Polyhedron1& FirstPol,
@@ -948,7 +934,7 @@ Standard_Boolean Intf_InterferencePolyhedron::TangentZoneValue
 //purpose  : 
 //=======================================================================
 
-void CoupleCharacteristics(const Polyhedron1& FirstPol,
+void Intf_InterferencePolyhedron::CoupleCharacteristics(const Polyhedron1& FirstPol,
 			   const Polyhedron2& SeconPol)
 {
   Standard_Integer n1, n2;

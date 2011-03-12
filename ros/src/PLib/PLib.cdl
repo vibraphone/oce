@@ -75,7 +75,6 @@ is
 
      Bin(N,P : Integer) returns Real;  
       ---Purpose: Returns the Binomial Cnp , without testing anything.
-    	---C++: inline
 
      Binomial(N : Integer);  
       ---Purpose:  test on N >  maxbinom and build the PASCAL triangle

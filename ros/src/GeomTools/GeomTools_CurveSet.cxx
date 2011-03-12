@@ -484,6 +484,7 @@ void GeomTools_CurveSet::PrintCurve(const Handle(Geom_Curve)& C,
 
 void  GeomTools_CurveSet::Dump(Standard_OStream& OS)const 
 {
+  int  prec = OS.precision(17);
   Standard_Integer i, nbsurf = myMap.Extent();
   OS << "\n -------\n";
   OS << "Dump of "<< nbsurf << " Curves ";
@@ -493,6 +494,7 @@ void  GeomTools_CurveSet::Dump(Standard_OStream& OS)const
     OS << setw(4) << i << " : ";
     PrintCurve(Handle(Geom_Curve)::DownCast(myMap(i)),OS,Standard_False);
   }
+  OS.precision(prec);
 }
 
 

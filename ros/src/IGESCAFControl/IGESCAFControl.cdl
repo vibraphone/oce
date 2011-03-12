@@ -16,6 +16,7 @@ uses
     TopoDS,
     TopTools,
     TDocStd,
+    TDF,
     XCAFDoc,
     XCAFPrs,
     XSControl,

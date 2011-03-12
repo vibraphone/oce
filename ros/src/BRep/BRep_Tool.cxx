@@ -306,12 +306,8 @@ Handle(Geom2d_Curve) BRep_Tool::CurveOnSurface(const TopoDS_Edge& E,
 
   if (!GP.IsNull()) {
 
-    static Handle(GeomAdaptor_HCurve) HC;
-    static Handle(GeomAdaptor_HSurface) HS;
-    if (HC.IsNull()) {
-      HC = new GeomAdaptor_HCurve();
-      HS = new GeomAdaptor_HSurface();
-    }
+    Handle(GeomAdaptor_HCurve) HC = new GeomAdaptor_HCurve;
+    Handle(GeomAdaptor_HSurface) HS = new GeomAdaptor_HSurface;
 
     TopLoc_Location LC;
 
@@ -1401,11 +1397,13 @@ gp_Pnt2d  BRep_Tool::Parameters(const TopoDS_Vertex& V,
   Standard_NoSuchObject::Raise("BRep_Tool:: no parameters on surface");
   return gp_Pnt2d(0,0);
 }
+
 //=======================================================================
 //function : IsClosed
 //purpose  : Returns <True>  if S if flaged Closed, if S is a
 //           Solid,Shell or Compound  returns <True> is S has no free boundaries.
 //=======================================================================
+
 Standard_Boolean BRep_Tool::IsClosed(const TopoDS_Shape& S)
 {
   if (S.ShapeType() == TopAbs_SHELL || S.ShapeType() == TopAbs_SOLID ||
@@ -1422,7 +1420,6 @@ Standard_Boolean BRep_Tool::IsClosed(const TopoDS_Shape& S)
   }
   return (S.Closed());
 }
-
 //modified by NIZNHY-PKV Fri Oct 17 14:09:58 2008 f 
 //=======================================================================
 //function : IsPlane

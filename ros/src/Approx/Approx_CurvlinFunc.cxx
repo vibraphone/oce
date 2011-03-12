@@ -12,8 +12,7 @@
  #include <GCPnts_AbscissaPoint.hxx>
 #include <Precision.hxx>
 
-static Standard_Real myPrevS, myPrevU;
-#ifdef DEB
+#ifdef __OCC_CHRONO
 #include <OSD_Timer.hxx>
 static OSD_Chronometer chr_uparam;
 Standard_EXPORT Standard_Integer uparam_count;
@@ -206,8 +205,8 @@ void Approx_CurvlinFunc::Init(Adaptor3d_Curve& C, Handle(TColStd_HArray1OfReal)&
   for(i = Si->Lower(); i<= Si->Upper(); i++)
     Si->ChangeValue(i) /= Len;
 
-  myPrevS = myFirstS;
-  myPrevU = FirstU;
+  const_cast<Approx_CurvlinFunc*>(this)->myPrevS = myFirstS;
+  const_cast<Approx_CurvlinFunc*>(this)->myPrevU = FirstU;
 }
 
 void  Approx_CurvlinFunc::SetTol(const Standard_Real Tol)
@@ -431,7 +430,7 @@ Standard_Real Approx_CurvlinFunc::GetUParameter(Adaptor3d_Curve& C,
   Standard_Real deltaS, base, U, Length;
   Standard_Integer NbInt, NInterval, i;
   Handle(TColStd_HArray1OfReal) InitUArray, InitSArray;
-#ifdef DEB
+#ifdef __OCC_CHRONO
   InitChron(chr_uparam);
 #endif
   if(S < 0 || S > 1) Standard_ConstructionError::Raise("Approx_CurvlinFunc::GetUParameter");
@@ -477,10 +476,10 @@ Standard_Real Approx_CurvlinFunc::GetUParameter(Adaptor3d_Curve& C,
 
   U = GCPnts_AbscissaPoint(C, deltaS, base, UGuess, myTolLen).Parameter();
 
-  myPrevS = S;
-  myPrevU = U;
+  const_cast<Approx_CurvlinFunc*>(this)->myPrevS = S;
+  const_cast<Approx_CurvlinFunc*>(this)->myPrevU = U;
 
-#ifdef DEB
+#ifdef __OCC_CHRONO
   ResultChron(chr_uparam, t_uparam);
   uparam_count++;
 #endif

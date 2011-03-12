@@ -51,7 +51,7 @@ inline int Standard_Atomic_DecrementTest (int volatile* var)
 //       however these definitions involve specific type atomic_t
 // Note: The same code probably would work for Intel compiler
 //===================================================
-#elif defined(LIN)
+#elif defined(LIN) || defined(__APPLE__)
 
 inline void Standard_Atomic_Increment (int volatile* var)
 {

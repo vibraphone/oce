@@ -19,6 +19,9 @@ class ReShape from BRepTools inherits TShared from MMgt
     --           
     --          Then, these requests may be applied to any shape which may
     --          contain one or more of these individual shapes
+    --
+    --          Requests stored in another ReShape object can be accumulated into
+    --          \a this object using the Join() method.
 
 uses 
     ShapeEnum from TopAbs, 
@@ -97,6 +100,15 @@ is
 	--          TopoDS_Wire or TopoDS_Compound containing TopoDS_Edges).
 	--          If incompatible shape type is encountered, it is ignored
 	--          and flag FAIL1 is set in Status.
+
+    Join (me: mutable; theOther: ReShape) is virtual;
+    ---Purpose: Adds mapping of \a theOther into \a this.
+    --          Thus, \a this will contain a cumulative map. This can be used,
+    --          for example, for concurrent shape processing and then reduction
+    --          (i.e. accumulation of results in a single object).
+    ---Warning: \a theOther and \a this should be consistent (e.g. they should
+    --          not contain the same subshapes, or ModeConsiderLocation() and
+    --          ModeConsiderOrientation() should be the same).
     
     ModeConsiderLocation(me: mutable) returns Boolean;
     ---C++: return &

@@ -90,7 +90,6 @@ myPrecisionCode(PrecisCode),
 myMaxDegInU(MaxDegInU),
 myMaxDegInV(MaxDegInV),
 myMaxPatches(MaxPatch),
-myEvaluator(Func),
 myDone(Standard_False),
 myHasResult(Standard_False)
 {
@@ -149,7 +148,6 @@ myPrecisionCode(PrecisCode),
 myMaxDegInU(MaxDegInU),
 myMaxDegInV(MaxDegInV),
 myMaxPatches(MaxPatch),
-myEvaluator(Func),
 myDone(Standard_False),
 myHasResult(Standard_False)
 {

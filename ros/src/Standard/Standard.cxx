@@ -41,13 +41,25 @@ Standard_MMgrFactory::Standard_MMgrFactory() : myFMMgr(0)
   Standard_Boolean bClear, bMMap, bReentrant;
   Standard_Integer aCellSize, aNbPages, aThreshold, bOptAlloc;
   //
-  bOptAlloc   = atoi((var = getenv("MMGT_OPT"      )) ? var : "1"    ); 
+  bOptAlloc   = atoi((var = getenv("MMGT_OPT"      )) ? var :
+#ifdef HAVE_TBB
+  "2"
+#else
+  "0"
+#endif
+  ); 
   bClear      = atoi((var = getenv("MMGT_CLEAR"    )) ? var : "1"    );
   bMMap       = atoi((var = getenv("MMGT_MMAP"     )) ? var : "1"    ); 
   aCellSize   = atoi((var = getenv("MMGT_CELLSIZE" )) ? var : "200"  ); 
   aNbPages    = atoi((var = getenv("MMGT_NBPAGES"  )) ? var : "1000" );
   aThreshold  = atoi((var = getenv("MMGT_THRESHOLD")) ? var : "40000");
-  bReentrant  = atoi((var = getenv("MMGT_REENTRANT")) ? var : "0"    );
+  bReentrant  = atoi((var = getenv("MMGT_REENTRANT")) ? var :
+#ifdef HAVE_TBB
+  "1"
+#else
+  "0"
+#endif
+  );
   
   if ( bOptAlloc == 1 ) { 
     myFMMgr = new Standard_MMgrOpt(bClear, bMMap, aCellSize, aNbPages,

@@ -119,6 +119,7 @@ static void WriteTrsf(const gp_Trsf& T,
 
 void  TopTools_LocationSet::Dump(Standard_OStream& OS) const 
 {
+  int  prec = OS.precision(17);
   Standard_Integer i, nbLoc = myMap.Extent();
 
   OS << "\n\n";
@@ -152,6 +153,7 @@ void  TopTools_LocationSet::Dump(Standard_OStream& OS) const
     }
     WriteTrsf(L.Transformation(),OS,Standard_False);
   }
+  OS.precision(prec);
 } 
 
 //=======================================================================
@@ -162,7 +164,7 @@ void  TopTools_LocationSet::Dump(Standard_OStream& OS) const
 void  TopTools_LocationSet::Write(Standard_OStream& OS) const 
 {
   
-  int  prec = OS.precision(15);
+  int  prec = OS.precision(17);
 
   Standard_Integer i, nbLoc = myMap.Extent();
   OS << "Locations " << nbLoc << "\n";

@@ -22,7 +22,7 @@
 
 #define FuncTol 1.e-10
 
-#if DEB
+#if __OCC_CHRONO
 #include <OSD_Timer.hxx>
 
 static OSD_Chronometer chr_init_point, chr_dicho_bound;
@@ -45,7 +45,6 @@ static void ResultChron( OSD_Chronometer & ch, Standard_Real & time)
 }
 #endif
 
-static Handle(TColStd_HArray1OfReal) TabInt;
 
 //=======================================================================
 //function : d1
@@ -159,7 +158,7 @@ static void d1(const Standard_Real t,
 //purpose  : computes first derivative of the 3d projected curve
 //=======================================================================
 
-#ifdef DEB
+#if 0
 static void d1CurvOnSurf(const Standard_Real t,
                          const Standard_Real u,
                          const Standard_Real v,
@@ -398,7 +397,7 @@ static void DichExactBound(gp_Pnt& Sol,
                            const Handle(Adaptor3d_HCurve)& Curve, 
                            const Handle(Adaptor3d_HSurface)& Surface)
 {
-#ifdef DEB
+#ifdef __OCC_CHRONO
   InitChron(chr_dicho_bound);
 #endif
 
@@ -426,7 +425,7 @@ static void DichExactBound(gp_Pnt& Sol,
     }
     else aNotSol = t; 
   }
-#ifdef DEB
+#ifdef __OCC_CHRONO
       ResultChron(chr_dicho_bound,t_dicho_bound);
       dicho_bound_count++;
 #endif
@@ -632,11 +631,11 @@ static Standard_Boolean InitialPoint(const gp_Pnt& Point,
       if (!initpoint) 
       {        
          myCurve->D0(t,CPoint);
-#ifdef DEB
+#ifdef __OCC_CHRONO
          InitChron(chr_init_point);
 #endif
          initpoint=InitialPoint(CPoint, t,myCurve,mySurface, myTolU, myTolV, U, V);
-#ifdef DEB
+#ifdef __OCC_CHRONO
          ResultChron(chr_init_point,t_init_point);
          init_point_count++;
 #endif
@@ -1278,7 +1277,7 @@ gp_Vec2d ProjLib_CompProjectedCurve::DN(const Standard_Real t,
 
  Standard_Integer ProjLib_CompProjectedCurve::NbIntervals(const GeomAbs_Shape S) const
 {
-  TabInt.Nullify();
+  const_cast<ProjLib_CompProjectedCurve*>(this)->TabInt.Nullify();
   BuildIntervals(S);
   Standard_Integer NbInt;
   NbInt=TabInt->Length() - 1;
@@ -1512,7 +1511,7 @@ gp_Vec2d ProjLib_CompProjectedCurve::DN(const Standard_Real t,
       BArr->ChangeValue(i) = Fusion(i);
   }
 
-  TabInt = new TColStd_HArray1OfReal(1, BArr->Length());
+  const_cast<ProjLib_CompProjectedCurve*>(this)->TabInt = new TColStd_HArray1OfReal(1, BArr->Length());
   for(i = 1; i <= BArr->Length(); i++)
     TabInt->ChangeValue(i) = BArr->Value(i);
 

@@ -604,6 +604,7 @@ void GeomTools_SurfaceSet::PrintSurface(const Handle(Geom_Surface)& S,
 
 void  GeomTools_SurfaceSet::Dump(Standard_OStream& OS)const 
 {
+  int  prec = OS.precision(17);
   Standard_Integer i, nbsurf = myMap.Extent();
   OS << "\n -------\n";
   OS << "Dump of "<< nbsurf << " surfaces ";
@@ -613,6 +614,7 @@ void  GeomTools_SurfaceSet::Dump(Standard_OStream& OS)const
     OS << setw(4) << i << " : ";
     PrintSurface(Handle(Geom_Surface)::DownCast(myMap(i)),OS,Standard_False);
   }
+  OS.precision(prec);
 }
 
 

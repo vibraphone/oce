@@ -542,6 +542,10 @@ Handle(Geom_BSplineSurface) IGESToBRep_BasicSurface::TransferSplineSurface
   //  ===============================
 
   IGESConvGeom::IncreaseSurfaceContinuity (resconv, epsgeom, GetContinuity());
+  
+  //Roman Lygin June 16, 2010 Here must be a call to ConverToPeriodic() for consistency with
+  //TransferBSplineSurface(). It should be up to OCC team to add it and verify non-regression
+  
   return resconv;
 }
 
@@ -893,35 +897,13 @@ Handle(Geom_BSplineSurface)  IGESToBRep_BasicSurface::TransferBSplineSurface
   //  Checking C2 and C1 continuity :
   //  ===============================
   
-  Standard_Integer icont = GetContinuity();
-  if ( icont < 1) return res;
-  //Standard_Boolean isC1 = Standard_True, isC2 = Standard_True; //szv#4:S4163:12Mar99 not needed
-
-  i = res->LastUKnotIndex();
-  Standard_Integer FirstIndex = res->FirstUKnotIndex();
-  while (--i >= FirstIndex+1) {
-    if (icont >=2) {
-      if(!res->RemoveUKnot(i, DegreeU-2, GetEpsGeom())) {
-	//isC2 = Standard_False; //szv#4:S4163:12Mar99 not needed
-	res->RemoveUKnot(i, DegreeU-1, GetEpsGeom()); //szv#4:S4163:12Mar99 `isC1=` not needed
-      }
-      else
-	res->RemoveUKnot(i, DegreeU-1, GetEpsGeom()); //szv#4:S4163:12Mar99 `isC1=` not needed
-    }
-  }
-
-  i = res->LastVKnotIndex();
-  FirstIndex = res->FirstVKnotIndex();
-  while (--i >= FirstIndex+1) {
-    if (icont >=2) {
-      if(!res->RemoveVKnot(i, DegreeV-2, GetEpsGeom())) {
-	//isC2 = Standard_False; //szv#4:S4163:12Mar99 not needed
-	res->RemoveVKnot(i, DegreeV-1, GetEpsGeom()); //szv#4:S4163:12Mar99 `isC1=` not needed
-      }
-      else
-	res->RemoveVKnot(i, DegreeV-1, GetEpsGeom()); //szv#4:S4163:12Mar99 `isC1=` not needed
-    }
-  }
+  //Roman Lygin, June 16, 2010 - here must be code for increasing continuity
+  //but code which existed prior to and including 6.3.1 actually never worked (the code would
+  //have worked for icont>=2 and would have mistakenly removed knots due to incorrectly written
+  //if-else clauses). So a call to IGESConvGeom is commented. It should be up to OCC team to
+  //uncomment and verify non-regression.
+  //IGESConvGeom::IncreaseSurfaceContinuity (res, GetEpsGeom(), GetContinuity());
+  
 
   //:h7 abv 14 Jul 98: ims010.igs 2519: closed periodic surface should be forced
   // else some wires which can lie over the seam will be incorrect

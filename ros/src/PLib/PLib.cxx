@@ -10,6 +10,8 @@
 #define No_Standard_OutOfRange
 
 #include <PLib.ixx>
+#include <BSplCLib.hxx>
+#include <PLib_LocalArray.hxx>
 #include <math_Matrix.hxx> 
 #include <math_Gauss.hxx> 
 #include <Standard_ConstructionError.hxx>
@@ -40,6 +42,45 @@
 
 #include <math_Gauss.hxx>
 #include <math.hxx>
+
+//Roman Lygin 19 Sep 2009
+//To ensure thread-safety the array of coefficients is initialized in load-time
+
+static Standard_Integer theMaxBinom = -1;
+static Standard_Address theBinom;
+
+class BinomAllocator
+{
+public:
+    BinomAllocator()
+    {
+        PLib::InternalBinomial (BSplCLib::MaxDegree() + 1, theMaxBinom, theBinom);
+    }
+    virtual ~BinomAllocator()
+    {
+        if (theBinom)
+            delete [] ((Standard_Integer**)theBinom);
+        theBinom = NULL;
+    }
+};
+static BinomAllocator theBinomAllocator;
+
+
+//=======================================================================
+//function : Bin
+//purpose  : 
+//=======================================================================
+
+Standard_Real PLib::Bin(const Standard_Integer N,
+                        const Standard_Integer P)
+{
+  return (Standard_Real)((Standard_Integer**)theBinom)[N][P];
+}
+
+//=======================================================================
+//function : InternalBinomial
+//purpose  : 
+//=======================================================================
 
 void PLib::InternalBinomial(const Standard_Integer N,
 			    Standard_Integer& maxbinom,
@@ -87,23 +128,6 @@ void PLib::InternalBinomial(const Standard_Integer N,
       }
     }
     maxbinom = N;
-  }
-}
-
-static Standard_Integer  storage_size = 0 ;
-static Standard_Real *derivative_storage= NULL;
-static Standard_Integer binomial_size = 0;
-static Standard_Real *binomial_array = NULL;
-
-static void LocalArray(const Standard_Integer newsize,
-		       Standard_Integer& size,
-		       Standard_Real** arr)
-{
-  // update a local array
-  if (newsize > size) {
-    if (*arr) delete [] *arr;
-    size = newsize;
-    *arr = new Standard_Real [size];
   }
 }
 
@@ -161,29 +185,20 @@ void  PLib::RationalDerivative(const Standard_Integer Degree,
   Standard_Real *RationalArray = &RDers;
   Standard_Real Factor ;
   Standard_Integer ii, Index, OtherIndex, Index1, Index2, jj;
+  PLib_LocalArray binomial_array;
+  PLib_LocalArray derivative_storage;
   if (Dimension == 3) {
     Standard_Integer DeRequest1 = DerivativeRequest + 1;
     Standard_Integer MinDegRequ = DerivativeRequest;
     if (MinDegRequ > Degree) MinDegRequ = Degree;
-    if (DeRequest1 > binomial_size) {
-      if (binomial_size > 0) {
-	delete [] binomial_array;
-      }
-      binomial_array = new Standard_Real [DeRequest1];
-      binomial_size  = DeRequest1;
-    }
+    binomial_array.Allocate (DeRequest1);
     
     for (ii = 0 ; ii < DeRequest1 ; ii++) {
       binomial_array[ii] = 1.0e0 ;
     }
     if (!All) {
       Standard_Integer DimDeRequ1 = (DeRequest1 << 1) + DeRequest1;
-      if (storage_size < DimDeRequ1) {
-        if (storage_size > 0)
-          delete [] derivative_storage ;
-        derivative_storage = new Standard_Real [DimDeRequ1];
-        storage_size = DimDeRequ1;
-      }
+      derivative_storage.Allocate (DimDeRequ1);
       RationalArray = derivative_storage ;
     }
     
@@ -258,25 +273,14 @@ void  PLib::RationalDerivative(const Standard_Integer Degree,
     Standard_Integer DeRequest1 = DerivativeRequest + 1;
     Standard_Integer MinDegRequ = DerivativeRequest;
     if (MinDegRequ > Degree) MinDegRequ = Degree;
-    if (DeRequest1 > binomial_size) {
-      if (binomial_size > 0) {
-	delete [] binomial_array;
-      }
-      binomial_array = new Standard_Real [DeRequest1];
-      binomial_size  = DeRequest1;
-    }
+    binomial_array.Allocate (DeRequest1);
     
     for (ii = 0 ; ii < DeRequest1 ; ii++) {
       binomial_array[ii] = 1.0e0 ;
     }
     if (!All) {
       Standard_Integer DimDeRequ1 = Dimension * DeRequest1;
-      if (storage_size < DimDeRequ1) {
-        if (storage_size > 0)
-          delete [] derivative_storage ;
-        derivative_storage = new Standard_Real [DimDeRequ1];
-        storage_size = DimDeRequ1;
-      }
+      derivative_storage.Allocate (DimDeRequ1);
       RationalArray = derivative_storage ;
     }
     
@@ -401,13 +405,8 @@ void  PLib::RationalDerivatives(const Standard_Integer DerivativeRequest,
   Standard_Integer ii, Index, Index1, Index2, jj;
   Standard_Integer DeRequest1 = DerivativeRequest + 1;
   
-  if (DeRequest1 > binomial_size) {
-    if (binomial_size > 0) {
-      delete [] binomial_array;
-    }
-    binomial_array = new Standard_Real [DeRequest1];
-    binomial_size  = DeRequest1;
-  }
+  PLib_LocalArray binomial_array (DeRequest1);
+  PLib_LocalArray derivative_storage;
 
   for (ii = 0 ; ii < DeRequest1 ; ii++) {
     binomial_array[ii] = 1.0e0 ;
@@ -1938,9 +1937,8 @@ PLib::EvalLagrange(const Standard_Real                   Parameter,
   ResultArray = &Results ;
   if (local_request >= Degree) {
     local_request = Degree ;
-  }   
-  LocalArray((Degree + 1) * Dimension,
-             storage_divided, &divided_differences_array) ;
+  }
+  PLib_LocalArray divided_differences_array ((Degree + 1) * Dimension);
   //
   //  Build the divided differences array
   //
@@ -2070,8 +2068,7 @@ Standard_Integer PLib::EvalCubicHermite
   if (local_request >= Degree) {
     local_request = Degree ;
   }   
-  LocalArray((Degree + 1) * Dimension,
-             storage_size, &divided_differences_array) ;
+  PLib_LocalArray divided_differences_array ((Degree + 1) * Dimension);
 
   for (ii = 0, jj = 0  ; ii < 2 ; ii++, jj+= 2) {
     ParametersArray[jj] =

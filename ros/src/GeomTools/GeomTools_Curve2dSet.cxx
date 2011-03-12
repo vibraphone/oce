@@ -467,6 +467,7 @@ void GeomTools_Curve2dSet::PrintCurve2d(const Handle(Geom2d_Curve)& C,
 
 void  GeomTools_Curve2dSet::Dump(Standard_OStream& OS)const 
 {
+  int  prec = OS.precision(17);
   Standard_Integer i, nbsurf = myMap.Extent();
   OS << "\n -------\n";
   OS << "Dump of "<< nbsurf << " Curve2ds ";
@@ -476,6 +477,7 @@ void  GeomTools_Curve2dSet::Dump(Standard_OStream& OS)const
     OS << setw(4) << i << " : ";
     PrintCurve2d(Handle(Geom2d_Curve)::DownCast(myMap(i)),OS,Standard_False);
   }
+  OS.precision(prec);
 }
 
 

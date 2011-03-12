@@ -212,10 +212,13 @@ void BRepMesh_IncrementalMesh::Update(const TopoDS_Shape& S)
   }
 
   // mesh faces in parallel threads using TBB
+#if 0
+  //See BRepMesh_FastDiscret.cxx for explanation of disabling concurrency
 #ifdef HAVE_TBB
   if (Standard::IsReentrant())
     tbb::parallel_for_each (aFaces.begin(), aFaces.end(), *myMesh.operator->());
   else
+#endif
 #endif
   for (std::vector<TopoDS_Face>::iterator it(aFaces.begin()); it != aFaces.end(); it++)
     myMesh->Process (*it);

@@ -33,7 +33,8 @@ uses    Standard,
 	Poly,
 	Geom2d,
 	GeomAbs,
-        GeomAdaptor
+        GeomAdaptor,
+	Plugin
 
 
 is 

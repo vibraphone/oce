@@ -140,4 +140,5 @@ fields
     ddv : Real[10];
     maxConstraintOrder : Integer; 
     PolynomialPartOnly  :  Boolean;
+    Uold, Vold, U2, R, L : Real;
 end;

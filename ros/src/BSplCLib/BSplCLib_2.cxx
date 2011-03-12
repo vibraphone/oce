@@ -6,9 +6,6 @@
 //                            EvalBsplineBasis,
 //                            EvalPolynomial : Horners method
 
-#define No_Standard_RangeError
-#define No_Standard_OutOfRange
-
 #include <Standard_Stream.hxx>
 
 #include <BSplCLib.hxx>
@@ -32,8 +29,9 @@ struct BSplCLib_DataContainer
 {
   BSplCLib_DataContainer(Standard_Integer Degree) 
   {
-    if ( Degree > BSplCLib::MaxDegree() || BSplCLib::MaxDegree() > 25 )
-      Standard_OutOfRange::Raise ("BSplCLib: bspline degree is greater than maximum supported");
+    Standard_OutOfRange_Raise_if (Degree > BSplCLib::MaxDegree() ||
+        BSplCLib::MaxDegree() > 25,
+        "BSplCLib: bspline degree is greater than maximum supported");
   }
 
   Standard_Real poles[2*(25+1)];
@@ -918,7 +916,7 @@ void BSplCLib::FunctionMultiply
 
   for (ii = 1 ; ii <= num_new_poles ; ii++) {
     contact_order_array(ii) = 0 ;
-    (*FunctionPtr)(contact_order_array(ii),
+    (*const_cast <BSplCLib_EvaluatorFunction*> (&FunctionPtr)).Evaluate (contact_order_array(ii),
 		   start_end,
 		   parameters(ii),
 		   result,
@@ -1008,7 +1006,7 @@ void BSplCLib::FunctionReparameterise
 
   for (ii = 1 ; ii <= num_new_poles ; ii++) {
     contact_order_array(ii) = 0 ;
-    (*FunctionPtr)(contact_order_array(ii),
+    (*const_cast <BSplCLib_EvaluatorFunction*> (&FunctionPtr)).Evaluate (contact_order_array(ii),
 		   start_end,
 		   parameters(ii),
 		   result,

@@ -93,10 +93,12 @@ fields
     myC1    : Address from Standard;
     myC2    : Address from Standard;
     myTol   : Real;
-    myU     : Real;          -- valeur courante de U
-    myV     : Real;          -- valeur courante de V
-    myP1    : Pnt;   -- point courant C1(U)
-    myP2    : Pnt;   -- point courant C2(U)
+    myU     : Real;  -- current value of U
+    myV     : Real;  -- current value of V
+    myP1    : Pnt;   -- current point C1(U)
+    myP2    : Pnt;   -- current point C2(V)
+    myDu    : Vec;   -- current D1 C1(U)
+    myDv    : Vec;   -- current D1 C2(V)
 
     mySqDist: SequenceOfReal from TColStd;
     myPoints: SeqPOnC;

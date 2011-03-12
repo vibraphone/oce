@@ -23,9 +23,6 @@
 
 #include <stdio.h>
 
-static Standard_Boolean IsClear = Standard_False;
-static Standard_Integer nbML = 0;
-
 #ifdef DEB
 static Standard_Boolean mydebug = Standard_False;
 
@@ -390,7 +387,8 @@ Approx_ComputeLine::Approx_ComputeLine
 		     const Standard_Real Tolerance2d,
 		     const Standard_Integer NbIterations,
 		     const Standard_Boolean cutting,
-		     const Standard_Boolean Squares)
+		     const Standard_Boolean Squares) :
+  IsClear (Standard_False), nbML (0)
 {
   myfirstParam = new TColStd_HArray1OfReal(Parameters.Lower(), 
 					   Parameters.Upper());
@@ -421,7 +419,8 @@ Approx_ComputeLine::Approx_ComputeLine
 		     const Standard_Real Tolerance2d,
 		     const Standard_Integer NbIterations,
 		     const Standard_Boolean cutting,
-		     const Standard_Boolean Squares)
+		     const Standard_Boolean Squares) :
+  IsClear (Standard_False), nbML (0)
 {
   myfirstParam = new TColStd_HArray1OfReal(Parameters.Lower(), 
 					   Parameters.Upper());
@@ -450,7 +449,8 @@ Approx_ComputeLine::Approx_ComputeLine
 		     const Standard_Integer NbIterations,
 		     const Standard_Boolean cutting,
 		     const Approx_ParametrizationType parametrization,
-		     const Standard_Boolean Squares)
+		     const Standard_Boolean Squares) :
+  IsClear (Standard_False), nbML (0)
 {
   myConstraints = new AppParCurves_HArray1OfConstraintCouple(1, 2);
   Par = parametrization;
@@ -476,7 +476,8 @@ Approx_ComputeLine::Approx_ComputeLine
 		     const Standard_Integer NbIterations,
 		     const Standard_Boolean cutting,
 		     const Approx_ParametrizationType parametrization,
-		     const Standard_Boolean Squares)
+		     const Standard_Boolean Squares) :
+  IsClear (Standard_False), nbML (0)
 {
   myConstraints = new AppParCurves_HArray1OfConstraintCouple(1, 2);
   alldone = Standard_False;

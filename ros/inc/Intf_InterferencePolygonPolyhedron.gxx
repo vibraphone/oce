@@ -18,16 +18,16 @@
 #include <Intf.hxx>
 
 #ifdef DEB
-static  Standard_Integer debug=0;
+static const Standard_Integer debug=0;
 #endif
 #if 0
-static  Standard_Real PRCANG=0.1;
+static const Standard_Real PRCANG=0.1;
 #endif
 
 //#ifndef DEB
-static int Pourcent3[4]={0,1,2,0};
+static const int Pourcent3[4]={0,1,2,0};
 //#else
-//static  Pourcent3[4]={0,1,2,0};
+//static const Pourcent3[4]={0,1,2,0};
 //#endif
 
 #include <Extrema_ExtElC.hxx>
@@ -66,12 +66,9 @@ Intf_InterferencePolygonPolyhedron::Intf_InterferencePolygonPolyhedron()
 //           and a Polyhedron.
 //=======================================================================
 
-static Standard_Boolean BeginOfClosedPolygon;
-static Standard_Integer iLin;
-
 Intf_InterferencePolygonPolyhedron::Intf_InterferencePolygonPolyhedron
   (const Polygon3d& thePolyg, const Polyhedron& thePolyh) 
-: Intf_Interference(Standard_False)
+: Intf_Interference(Standard_False), BeginOfClosedPolygon (Standard_False), iLin (0)
 {
   Tolerance=ToolPolygon3d::DeflectionOverEstimation(thePolyg)+
 	    ToolPolyh::DeflectionOverEstimation(thePolyh);
@@ -89,7 +86,7 @@ Intf_InterferencePolygonPolyhedron::Intf_InterferencePolygonPolyhedron
 Intf_InterferencePolygonPolyhedron::Intf_InterferencePolygonPolyhedron
   (const Polygon3d& thePolyg, const Polyhedron& thePolyh,
    Bnd_BoundSortBox &PolyhGrid) 
-: Intf_Interference(Standard_False)
+: Intf_Interference(Standard_False), BeginOfClosedPolygon (Standard_False), iLin (0)
 {
   Tolerance=ToolPolygon3d::DeflectionOverEstimation(thePolyg)+
 	    ToolPolyh::DeflectionOverEstimation(thePolyh);
@@ -109,7 +106,7 @@ Intf_InterferencePolygonPolyhedron::Intf_InterferencePolygonPolyhedron
 
 Intf_InterferencePolygonPolyhedron::Intf_InterferencePolygonPolyhedron
   (const gp_Lin& theLin, const Polyhedron& thePolyh) 
-: Intf_Interference(Standard_False)
+: Intf_Interference(Standard_False), BeginOfClosedPolygon (Standard_False), iLin (0)
 {
   Tolerance=ToolPolyh::DeflectionOverEstimation(thePolyh);
   if (Tolerance==0.)
@@ -148,7 +145,7 @@ Intf_InterferencePolygonPolyhedron::Intf_InterferencePolygonPolyhedron
 
 Intf_InterferencePolygonPolyhedron::Intf_InterferencePolygonPolyhedron 
   (const Intf_Array1OfLin& theLins, const Polyhedron& thePolyh) 
-: Intf_Interference(Standard_False)
+: Intf_Interference(Standard_False), BeginOfClosedPolygon (Standard_False), iLin (0)
 {
   Tolerance=ToolPolyh::DeflectionOverEstimation(thePolyh);
   if (Tolerance==0.)

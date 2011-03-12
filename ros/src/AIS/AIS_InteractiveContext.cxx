@@ -57,6 +57,7 @@
 #include <Prs3d_DatumAspect.hxx>
 #include <Prs3d_PlaneAspect.hxx>
 #include <PrsMgr_PresentableObject.hxx>
+#include <Standard_Atomic.hxx>
 #include <UnitsAPI.hxx>
 
 #include <AIS_Trihedron.hxx>
@@ -97,7 +98,7 @@ static TCollection_AsciiString AIS_Context_NewSelName()
   TCollection_AsciiString name("AIS_SelContext_");
   TCollection_AsciiString theind(index_sel);
   name += theind;
-  index_sel++;
+  Standard_Atomic_Increment (&index_sel);
   return name;
 }
 
@@ -107,11 +108,9 @@ static TCollection_AsciiString AIS_Context_NewCurName()
   TCollection_AsciiString name("AIS_CurContext_");
   TCollection_AsciiString theind(index_cur);
   name += theind;
-  index_cur++;
+  Standard_Atomic_Increment (&index_cur);
   return name;
 }
-
-static TColStd_ListIteratorOfListOfInteger ItL;
 
 
 //=======================================================================
@@ -504,7 +503,8 @@ void AIS_InteractiveContext::Display(const Handle(AIS_InteractiveObject)& anIObj
         updcol = updateviewer;
                          }// attention on fait expres de ne pas mettre de break..
       case AIS_DS_FullErased:{
-        for (ItL.Initialize(STATUS->DisplayedModes());ItL.More();ItL.Next()){
+        TColStd_ListIteratorOfListOfInteger ItL (STATUS->DisplayedModes());
+        for (;ItL.More();ItL.Next()){
           myMainPM->Display(anIObj,ItL.Value());
           if(STATUS->IsSubIntensityOn())
             myMainPM->Color(anIObj,mySubIntensity,ItL.Value());
@@ -523,7 +523,8 @@ void AIS_InteractiveContext::Display(const Handle(AIS_InteractiveObject)& anIObj
       //       Finally, activate selection mode <SelMode> if not yet activated.
       case AIS_DS_Displayed:{
         TColStd_ListOfInteger aModesToRemove;
-        for(ItL.Initialize(STATUS->DisplayedModes());ItL.More();ItL.Next()){
+        TColStd_ListIteratorOfListOfInteger ItL (STATUS->DisplayedModes());
+        for(;ItL.More();ItL.Next()){
 
           Standard_Integer OldMode = ItL.Value();
 
@@ -1817,7 +1818,8 @@ void AIS_InteractiveContext::SetDisplayMode(const Handle(AIS_InteractiveObject)&
       // SAN : erase presentations for all display modes different from <aMode>
       if(STATUS->GraphicStatus()==AIS_DS_Displayed){
         TColStd_ListOfInteger aModesToRemove;
-        for(ItL.Initialize(STATUS->DisplayedModes());ItL.More();ItL.Next()){
+        TColStd_ListIteratorOfListOfInteger ItL (STATUS->DisplayedModes());
+        for(;ItL.More();ItL.Next()){
 
           Standard_Integer OldMode = ItL.Value();
 
@@ -2626,7 +2628,8 @@ void AIS_InteractiveContext::Status(const Handle(AIS_InteractiveObject)& anIObj,
       break;
     }
     astatus += "\t| Active Display Modes in the MainViewer :\n";
-    for(ItL.Initialize(ST->DisplayedModes());ItL.More();ItL.Next()){
+    TColStd_ListIteratorOfListOfInteger ItL (ST->DisplayedModes());
+    for(;ItL.More();ItL.Next()){
       astatus += "\t|\t Mode ";
       astatus += TCollection_AsciiString(ItL.Value());
       astatus+="\n";
@@ -2688,7 +2691,8 @@ void AIS_InteractiveContext::EraseGlobal(const Handle(AIS_InteractiveObject)& an
   Standard_Integer Dmode = anIObj->HasHilightMode() ? anIObj->HilightMode() : 0;
   if(STATUS->GraphicStatus()==AIS_DS_Displayed){
     
-    for(ItL.Initialize(STATUS->DisplayedModes());ItL.More();ItL.Next()){
+    TColStd_ListIteratorOfListOfInteger ItL (STATUS->DisplayedModes());
+    for(;ItL.More();ItL.Next()){
       if(myMainPM->IsHighlighted(anIObj,ItL.Value()))
         myMainPM->Unhighlight(anIObj,ItL.Value());
       myMainPM->Erase(anIObj,ItL.Value());
@@ -2732,7 +2736,8 @@ void AIS_InteractiveContext::ClearGlobal(const Handle(AIS_InteractiveObject)& an
   // const Handle(AIS_GlobalStatus)& STATUS = myObjects(anIObj);
   Handle(AIS_GlobalStatus) STATUS = myObjects(anIObj);
   // ENDCLE
-   for(ItL.Initialize(STATUS->DisplayedModes());ItL.More();ItL.Next()){
+   TColStd_ListIteratorOfListOfInteger ItL (STATUS->DisplayedModes());
+   for(;ItL.More();ItL.Next()){
      if(STATUS->IsHilighted()){
        if(IsCurrent(anIObj))
 #ifdef OCC204

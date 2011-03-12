@@ -130,19 +130,7 @@ static
 int mma2ds2_(integer *ndimen, 
 	     doublereal *uintfn, 
 	     doublereal *vintfn, 
-	     void (*foncnp) (
-			    int *,
-			    double *,
-			    double *,
-			    int *,
-			    double *,
-			    int *,
-			    double *,
-			    int *,
-			    int *,
-			    double *,
-			    int *
-			    ), 
+         const AdvApp2Var_EvaluatorFunc2Var& foncnp,
 	     integer *nbpntu, 
 	     integer *nbpntv, 
 	     doublereal *urootb, 
@@ -162,19 +150,7 @@ int mma2ds2_(integer *ndimen,
 static
 int mma1fdi_(integer *ndimen, 
 	     doublereal *uvfonc, 
-	     void (*foncnp) (// see AdvApp2Var_EvaluatorFunc2Var.hxx for details
-			    int *,
-			    double *,
-			    double *,
-			    int *,
-			    double *,
-			    int *,
-			    double *,
-			    int *,
-			    int *,
-			    double *,
-			    int *
-			    ), 
+         const AdvApp2Var_EvaluatorFunc2Var& foncnp,
 	     integer *isofav, 
 	     doublereal *tconst, 
 	     integer *nbroot, 
@@ -644,19 +620,7 @@ int mma1cnt_(integer *ndimen,
 //=======================================================================
 int mma1fdi_(integer *ndimen, 
 	     doublereal *uvfonc, 
-	     void (*foncnp) (// see AdvApp2Var_EvaluatorFunc2Var.hxx for details
-			    int *,
-			    double *,
-			    double *,
-			    int *,
-			    double *,
-			    int *,
-			    double *,
-			    int *,
-			    int *,
-			    double *,
-			    int *
-			    ), 
+         const AdvApp2Var_EvaluatorFunc2Var& foncnp,
 	     integer *isofav, 
 	     doublereal *tconst, 
 	     integer *nbroot, 
@@ -840,7 +804,7 @@ int mma1fdi_(integer *ndimen,
 /* ---------------------- de Legendre de degre NBROOT ------------------- 
 */
 
-    (*foncnp)(ndimen, 
+    (*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (ndimen, 
 	      &uvfonc[3], 
 	      &uvfonc[5], 
 	      isofav, 
@@ -912,7 +876,8 @@ int mma1fdi_(integer *ndimen,
 	    bid1 = (uvfonc[6] - uvfonc[5]) / 2.;
 	    i__1 = *iordre;
 	    for (iderv = 1; iderv <= i__1; ++iderv) {
-		(*foncnp)(ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
+		(*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (
+            ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
 			nbp, ttable, &ideru, &iderv, &contr1[(iderv + 1) * 
 			contr1_dim1 + 1], iercod);
 		if (*iercod > 0) {
@@ -922,7 +887,8 @@ int mma1fdi_(integer *ndimen,
 	    }
 	    i__1 = *iordre;
 	    for (iderv = 1; iderv <= i__1; ++iderv) {
-		(*foncnp)(ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
+		(*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (
+            ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
 			nbp, &ttable[*nbroot + 1], &ideru, &iderv, &contr2[(
 			iderv + 1) * contr2_dim1 + 1], iercod);
 		if (*iercod > 0) {
@@ -936,7 +902,8 @@ int mma1fdi_(integer *ndimen,
 	    bid1 = (uvfonc[4] - uvfonc[3]) / 2.;
 	    i__1 = *iordre;
 	    for (ideru = 1; ideru <= i__1; ++ideru) {
-		(*foncnp)(ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
+		(*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (
+            ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
 			nbp, ttable, &ideru, &iderv, &contr1[(ideru + 1) * 
 			contr1_dim1 + 1], iercod);
 		if (*iercod > 0) {
@@ -946,7 +913,8 @@ int mma1fdi_(integer *ndimen,
 	    }
 	    i__1 = *iordre;
 	    for (ideru = 1; ideru <= i__1; ++ideru) {
-		(*foncnp)(ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
+		(*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (
+            ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
 			nbp, &ttable[*nbroot + 1], &ideru, &iderv, &contr2[(
 			ideru + 1) * contr2_dim1 + 1], iercod);
 		if (*iercod > 0) {
@@ -1128,7 +1096,7 @@ int mma1fer_(integer *,//ndimen,
 	if (ncfnw <= *ncflim) {
 	    mmaperm_(&ncfja, &ndses, &ncfja, iordre, &crvjac[idim * 
 		    crvjac_dim1], &ncfnw, &errmoy[ii]);
-	    *ncoeff = max(ncfnw,*ncoeff);
+	    *ncoeff = advapp_max(ncfnw,*ncoeff);
 
 /* ------------- Mise a 0.D0 des coefficients ecartes -----------
 -------- */
@@ -4604,12 +4572,12 @@ L400:
 
 L600:
 /* Computing MAX */
-	i__1 = 1, i__2 = (*iordru << 1) + 1, i__1 = max(i__1,i__2);
-	minu = max(i__1,*ndminu);
+	i__1 = 1, i__2 = (*iordru << 1) + 1, i__1 = advapp_max(i__1,i__2);
+	minu = advapp_max(i__1,*ndminu);
 	maxu = *ndguli;
 /* Computing MAX */
-	i__1 = 1, i__2 = (*iordrv << 1) + 1, i__1 = max(i__1,i__2);
-	minv = max(i__1,*ndminv);
+	i__1 = 1, i__2 = (*iordrv << 1) + 1, i__1 = advapp_max(i__1,i__2);
+	minv = advapp_max(i__1,*ndminv);
 	maxv = *ndgvli;
 	idim = 1;
 	i__1 = *nbsesp;
@@ -4649,8 +4617,8 @@ L600:
 	    }
 
 /* --> Recup des nbre de coeff de l'approximation. */
-	    *ndegpu = max(*ndegpu,nu);
-	    *ndegpv = max(*ndegpv,nv);
+	    *ndegpu = advapp_max(*ndegpu,nu);
+	    *ndegpv = advapp_max(*ndegpv,nv);
 	    idim += ndses;
 /* L610: */
 	}
@@ -4743,12 +4711,12 @@ L600:
 
 	    } else {
 /* Computing MAX */
-		i__2 = 1, i__3 = (*iordru << 1) + 1, i__2 = max(i__2,i__3);
-		minu = max(i__2,*ndminu);
+		i__2 = 1, i__3 = (*iordru << 1) + 1, i__2 = advapp_max(i__2,i__3);
+		minu = advapp_max(i__2,*ndminu);
 		maxu = *ndguli;
 /* Computing MAX */
-		i__2 = 1, i__3 = (*iordrv << 1) + 1, i__2 = max(i__2,i__3);
-		minv = max(i__2,*ndminv);
+		i__2 = 1, i__3 = (*iordrv << 1) + 1, i__2 = advapp_max(i__2,i__3);
+		minv = advapp_max(i__2,*ndminv);
 		maxv = *ndgvli;
 		if (maxu >= (*iordru + 1) << 1 && maxv >= (*iordrv + 1) << 1) {
 		    mma2er2_(ndjacu, ndjacv, &ndses, &minu, &maxu, &minv, &
@@ -4791,8 +4759,8 @@ L600:
 /* --------------- Recup des nbre de coeff de l'approximation ---
 -------- */
 
-	    *ndegpu = max(*ndegpu,nu);
-	    *ndegpv = max(*ndegpv,nv);
+	    *ndegpu = advapp_max(*ndegpu,nu);
+	    *ndegpv = advapp_max(*ndegpv,nv);
 	    idim += ndses;
 /* L730: */
 	}
@@ -5248,19 +5216,7 @@ int mma2cfv_(integer *ndvjac,
 int AdvApp2Var_ApproxF2var::mma2ds1_(integer *ndimen, 
 				     doublereal *uintfn, 
 				     doublereal *vintfn,
-				     void (*foncnp) (
-						     int *,
-						     double *,
-						     double *,
-						     int *,
-						     double *,
-						     int *,
-						     double *,
-						     int *,
-						     int *,
-						     double *,
-						     int *
-						     ),  
+                     const AdvApp2Var_EvaluatorFunc2Var& foncnp,
 				     integer *nbpntu, 
 				     integer *nbpntv, 
 				     doublereal *urootb, 
@@ -5593,19 +5549,7 @@ L9999:
 int mma2ds2_(integer *ndimen, 
 	     doublereal *uintfn, 
 	     doublereal *vintfn, 
-	     void (*foncnp) (
-			     int *,
-			     double *,
-			     double *,
-			     int *,
-			     double *,
-			     int *,
-			     double *,
-			     int *,
-			     int *,
-			     double *,
-			     int *
-			     ), 
+         const AdvApp2Var_EvaluatorFunc2Var& foncnp,
 	     integer *nbpntu, 
 	     integer *nbpntv, 
 	     doublereal *urootb, 
@@ -5877,7 +5821,8 @@ int mma2ds2_(integer *ndimen,
     i__1 = nvroo;
     for (iv = 1; iv <= i__1; ++iv) {
 	tcons = blinv + alinv * vrootb[iv];
-	(*foncnp)(ndimen, dbfn1, dbfn2, iiuouv, &tcons, nbpntu, &
+	(*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (
+        ndimen, dbfn1, dbfn2, iiuouv, &tcons, nbpntu, &
 		ttable[1], &c__0, &c__0, &fpntab[fpntab_offset], iercod);
 	if (*iercod > 0) {
 	    goto L9999;
@@ -5919,7 +5864,8 @@ int mma2ds2_(integer *ndimen,
 
     if (*nbpntv % 2 != 0) {
 	tcons = blinv;
-	(*foncnp)(ndimen, dbfn1, dbfn2, iiuouv, &tcons, nbpntu, &
+	(*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (
+        ndimen, dbfn1, dbfn2, iiuouv, &tcons, nbpntu, &
 		ttable[1], &c__0, &c__0, &fpntab[fpntab_offset], iercod);
 	if (*iercod > 0) {
 	    goto L9999;
@@ -5950,7 +5896,8 @@ int mma2ds2_(integer *ndimen,
     i__1 = nvroo;
     for (iv = 1; iv <= i__1; ++iv) {
 	tcons = alinv * vrootb[(*nbpntv + 1) / 2 + iv] + blinv;
-	(*foncnp)(ndimen, dbfn1, dbfn2, iiuouv, &tcons, nbpntu, &
+	(*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (
+        ndimen, dbfn1, dbfn2, iiuouv, &tcons, nbpntu, &
 		ttable[1], &c__0, &c__0, &fpntab[fpntab_offset], iercod);
 	if (*iercod > 0) {
 	    goto L9999;
@@ -6153,7 +6100,7 @@ int mma2er1_(integer *ndjacu,
 	    i__3 = *maxdgu;
 	    for (ii = *mindgu; ii <= i__3; ++ii) {
 		bid0 += (d__1 = patjac[ii + (jj + nd * patjac_dim2) * 
-			patjac_dim1], abs(d__1)) * xmaxju[ii - minu];
+			patjac_dim1], advapp_abs(d__1)) * xmaxju[ii - minu];
 /* L300: */
 	    }
 	    bid1 = bid0 * xmaxjv[jj - minv] + bid1;
@@ -6351,7 +6298,7 @@ L1001:
 	    i__2 = nu;
 	    for (ii = i2rdu; ii <= i__2; ++ii) {
 		bid1 += (d__1 = patjac[ii + (nv + nd * patjac_dim2) * 
-			patjac_dim1], abs(d__1)) * xmaxju[ii - i2rdu] * bid0;
+			patjac_dim1], advapp_abs(d__1)) * xmaxju[ii - i2rdu] * bid0;
 /* L200: */
 	    }
 	    vecerr[nd] = bid1;
@@ -6378,7 +6325,7 @@ L1001:
 	    i__2 = nv;
 	    for (jj = i2rdv; jj <= i__2; ++jj) {
 		bid1 += (d__1 = patjac[nu + (jj + nd * patjac_dim2) * 
-			patjac_dim1], abs(d__1)) * xmaxjv[jj - i2rdv] * bid0;
+			patjac_dim1], advapp_abs(d__1)) * xmaxjv[jj - i2rdv] * bid0;
 /* L400: */
 	    }
 	    vecerr[nd] = bid1;
@@ -6421,8 +6368,8 @@ L1001:
 */
 
 L2001:
-    *newdgu = max(nu,1);
-    *newdgv = max(nv,1);
+    *newdgu = advapp_max(nu,1);
+    *newdgv = advapp_max(nv,1);
 
 /* ----------------------------------- The end -------------------------- 
 */
@@ -6441,19 +6388,7 @@ int AdvApp2Var_ApproxF2var::mma2fnc_(integer *ndimen,
 				     integer *nbsesp, 
 				     integer *ndimse, 
 				     doublereal *uvfonc, 
-				     void (*foncnp) (
-						     int *,
-						     double *,
-						     double *,
-						     int *,
-						     double *,
-						     int *,
-						     double *,
-						     int *,
-						     int *,
-						     double *,
-						     int *
-						     ),  
+                     const AdvApp2Var_EvaluatorFunc2Var& foncnp,
 				     doublereal *tconst, 
 				     integer *isofav, 
 				     integer *nbroot, 
@@ -6732,10 +6667,10 @@ int AdvApp2Var_ApproxF2var::mma2fnc_(integer *ndimen,
 */
 
     AdvApp2Var_MathBase::mmveps3_(&eps3);
-    if ((d__1 = uvfonc[4] - uvfonc[3], abs(d__1)) < eps3) {
+    if ((d__1 = uvfonc[4] - uvfonc[3], advapp_abs(d__1)) < eps3) {
 	goto L9100;
     }
-    if ((d__1 = uvfonc[6] - uvfonc[5], abs(d__1)) < eps3) {
+    if ((d__1 = uvfonc[6] - uvfonc[5], advapp_abs(d__1)) < eps3) {
 	goto L9100;
     }
 
@@ -6760,9 +6695,9 @@ int AdvApp2Var_ApproxF2var::mma2fnc_(integer *ndimen,
 /*    auxiliaire pour MMAPCMP */
     ibid1 = *ndimen * (*nbroot + 2);
     ibid2 = ((*iordre + 1) << 1) * *nbroot;
-    isz2 = max(ibid1,ibid2);
+    isz2 = advapp_max(ibid1,ibid2);
     ibid1 = (((*ncflim - 1) / 2 + 1) << 1) * *ndimen;
-    isz2 = max(ibid1,isz2);
+    isz2 = advapp_max(ibid1,isz2);
 /* --> Pour recuperer les polynomes d'hermite. */
     isz3 = ((*iordre + 1) << 2) * (*iordre + 1);
 /* --> Pour les coeff. d'integration de Gauss. */
@@ -7199,30 +7134,30 @@ L200:
 		    tol = epsapr[ns];
 /* Computing MIN */
 		    d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 9];
-		    tol = min(d__1,d__2);
+		    tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 		    d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 10];
-		    tol = min(d__1,d__2);
+		    tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 		    d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 11];
-		    tol = min(d__1,d__2);
+		    tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 		    d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 12];
-		    tol = min(d__1,d__2);
+		    tol = advapp_min(d__1,d__2);
 		    if (ii == 1 || ii == *nbupat || jj == 1 || jj == *nbvpat) 
 			    {
 /* Computing MIN */
 			d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 5];
-			tol = min(d__1,d__2);
+			tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 			d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 6];
-			tol = min(d__1,d__2);
+			tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 			d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 7];
-			tol = min(d__1,d__2);
+			tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 			d__1 = tol, d__2 = epsfro[ns + (epsfro_dim1 << 3)];
-			tol = min(d__1,d__2);
+			tol = advapp_min(d__1,d__2);
 		    }
 		    bid = 0.;
 
@@ -7233,7 +7168,7 @@ L200:
 			for (kv = 1; kv <= i__5; ++kv) {
 			    bid += (d__1 = patcan[ncfu + (kv + (id + (ii + jj 
 				    * patcan_dim4) * patcan_dim3) * 
-				    patcan_dim2) * patcan_dim1], abs(d__1));
+				    patcan_dim2) * patcan_dim1], advapp_abs(d__1));
 /* L230: */
 			}
 /* L220: */
@@ -7267,30 +7202,30 @@ L300:
 		    tol = epsapr[ns];
 /* Computing MIN */
 		    d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 9];
-		    tol = min(d__1,d__2);
+		    tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 		    d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 10];
-		    tol = min(d__1,d__2);
+		    tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 		    d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 11];
-		    tol = min(d__1,d__2);
+		    tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 		    d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 12];
-		    tol = min(d__1,d__2);
+		    tol = advapp_min(d__1,d__2);
 		    if (ii == 1 || ii == *nbupat || jj == 1 || jj == *nbvpat) 
 			    {
 /* Computing MIN */
 			d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 5];
-			tol = min(d__1,d__2);
+			tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 			d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 6];
-			tol = min(d__1,d__2);
+			tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 			d__1 = tol, d__2 = epsfro[ns + epsfro_dim1 * 7];
-			tol = min(d__1,d__2);
+			tol = advapp_min(d__1,d__2);
 /* Computing MIN */
 			d__1 = tol, d__2 = epsfro[ns + (epsfro_dim1 << 3)];
-			tol = min(d__1,d__2);
+			tol = advapp_min(d__1,d__2);
 		    }
 		    bid = 0.;
 
@@ -7301,7 +7236,7 @@ L300:
 			for (ku = 1; ku <= i__5; ++ku) {
 			    bid += (d__1 = patcan[ku + (ncfv + (id + (ii + jj 
 				    * patcan_dim4) * patcan_dim3) * 
-				    patcan_dim2) * patcan_dim1], abs(d__1));
+				    patcan_dim2) * patcan_dim1], advapp_abs(d__1));
 /* L330: */
 			}
 /* L320: */
@@ -7323,8 +7258,8 @@ L300:
 ant --- */
 
 L400:
-	    ncoefu[ii + jj * ncoefu_dim1] = max(ncfu,2);
-	    ncoefv[ii + jj * ncoefv_dim1] = max(ncfv,2);
+	    ncoefu[ii + jj * ncoefu_dim1] = advapp_max(ncfu,2);
+	    ncoefv[ii + jj * ncoefv_dim1] = advapp_max(ncfv,2);
 /* L110: */
 	}
 /* L100: */
@@ -7726,8 +7661,8 @@ int mma2moy_(integer *ndgumx,
 
     idebu = (*iordru + 1) << 1;
     idebv = (*iordrv + 1) << 1;
-    minu = max(idebu,*mindgu);
-    minv = max(idebv,*mindgv);
+    minu = advapp_max(idebu,*mindgu);
+    minv = advapp_max(idebv,*mindgv);
     bid0 = 0.;
     *errmoy = 0.;
 

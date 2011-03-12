@@ -334,17 +334,7 @@ is
  
     SetSignal(aFloatingSignal: Boolean = Standard_True);
     ---Purpose:
-    --   1) Arms some floating point signals, and sets a "Handler" for them.
-    --   2) Sets a "Handler" for the "Hardware" signals.
-    --   For Win32 users: under VC++ you can control which method of handling
-    --   exceptions is used by means of UseSETranslator method before calling
-    --   SetSignal
-    --
-    --  Warning:
-    --   Some "Data Base Managers" use their own "Handler" for the signals 
-    --   such as  "SIGSEGV". So if a "Handler" is set for a signal it will
-    --   not be replaced by Standard "Handler". It is managed by OBJS
-    --   preprocessor definition.
+    --   Sets signal and exception handlers.
     --
     ---Level: Internal    
 
@@ -400,19 +390,6 @@ is
     ---Purpose: since Windows NT does not support 'SIGINT' signal like UNIX,
     --          then this method checks whether Ctrl-Break keystroke was or
     --          not. If yes then raises Exception_CTRL_BREAK.
-
-    UseSETranslator(useSE : Boolean);
-    ---Purpose: Defines whether SetSignal must use _se_translator_function or
-    --          SetUnhandledExceptionFilter and signal to catch system
-    --          exceptions. The default behaviour is to use SE translator.
-    --  Warning: Using SE translator method SetSignal should be called for each
-    --          new created thread, while using the alternative method 
-    --          the exception handler is established once for the whole
-    --          process and all its threads.
-    --          This function takes effect only under VC++ compiler.
-
-    UseSETranslator returns Boolean;
-    ---Purpose: Returns the current value of the flag set by above method.
 
 end OSD;
 

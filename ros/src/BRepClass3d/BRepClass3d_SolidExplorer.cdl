@@ -18,6 +18,7 @@ uses
     Pnt          from gp,
     Pnt2d        from gp,    
     Lin          from gp,
+    Vec          from gp,
     Face         from TopoDS,
     Shell        from TopoDS,
     Shape        from TopoDS,
@@ -58,6 +59,13 @@ is
     	    	    	    	 P: out Pnt from gp;
     	    	    	    	 u,v: out Real from Standard;
     	    	    	    	 Param: out Real from Standard) 
+    returns Boolean from Standard;
+
+    FindAPointInTheFace(myclass; F: Face from TopoDS; 
+    	    	    	    	 P: out Pnt from gp;
+    	    	    	    	 u,v: out Real from Standard;
+    	    	    	    	 Param: out Real from Standard;
+    	    	    	    	 D1U, D1V: out Vec from gp) 
     returns Boolean from Standard;
 
     FindAPointInTheFace(myclass; F: Face from TopoDS; 
@@ -188,5 +196,7 @@ fields
     myFaceExplorer  : Explorer from TopExp;
 
     myMapOfInter    : MapOfInter from BRepClass3d;
+    staticd1u_gp_vec: Vec from gp;
+    staticd1v_gp_vec: Vec from gp;
 
 end SolidExplorer;

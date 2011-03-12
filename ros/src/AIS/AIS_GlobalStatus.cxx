@@ -9,8 +9,6 @@
 
 
 
-static TColStd_ListIteratorOfListOfInteger It;
-
 
 AIS_GlobalStatus::AIS_GlobalStatus():
 myStatus(AIS_DS_None),
@@ -40,7 +38,8 @@ mySubInt(Standard_False)
 
 void AIS_GlobalStatus::RemoveDisplayMode(const Standard_Integer aMode)
 {
-  for(It.Initialize(myDispModes);It.More();It.Next()){
+  TColStd_ListIteratorOfListOfInteger It (myDispModes);
+  for(;It.More();It.Next()){
     if(It.Value()==aMode){ myDispModes.Remove(It);
 			   return;}
   }
@@ -48,7 +47,8 @@ void AIS_GlobalStatus::RemoveDisplayMode(const Standard_Integer aMode)
 
 void AIS_GlobalStatus::RemoveSelectionMode(const Standard_Integer aMode)
 {
-  for(It.Initialize(mySelModes);It.More();It.Next()){
+  TColStd_ListIteratorOfListOfInteger It (mySelModes);
+  for(;It.More();It.Next()){
     if(It.Value()==aMode){ mySelModes.Remove(It);
 			   return;}
   }
@@ -60,7 +60,8 @@ void AIS_GlobalStatus::ClearSelectionModes()
 
 Standard_Boolean AIS_GlobalStatus::IsDModeIn(const Standard_Integer aMode) const 
 {
-  for(It.Initialize(myDispModes);It.More();It.Next())
+  TColStd_ListIteratorOfListOfInteger It (myDispModes);
+  for(;It.More();It.Next())
     if(It.Value()==aMode) return Standard_True;
   return Standard_False;
   
@@ -68,7 +69,8 @@ Standard_Boolean AIS_GlobalStatus::IsDModeIn(const Standard_Integer aMode) const
 
 Standard_Boolean AIS_GlobalStatus::IsSModeIn(const Standard_Integer aMode) const 
 {
-  for(It.Initialize(mySelModes);It.More();It.Next())
+  TColStd_ListIteratorOfListOfInteger It (mySelModes);
+  for(;It.More();It.Next())
     if(It.Value()==aMode) return Standard_True;
   return Standard_False;
 }
