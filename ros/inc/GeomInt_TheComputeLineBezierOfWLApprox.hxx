@@ -169,6 +169,8 @@ Standard_Boolean mysquares;
 Standard_Integer myitermax;
 AppParCurves_Constraint myfirstC;
 AppParCurves_Constraint mylastC;
+Standard_Boolean IsClear;
+Standard_Integer nbML;
 
 
 };

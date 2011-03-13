@@ -13,21 +13,11 @@
 #include <Standard_Macro.hxx>
 #endif
 
-#ifndef _Standard_Real_HeaderFile
 #include <Standard_Real.hxx>
-#endif
-#ifndef _Standard_Integer_HeaderFile
 #include <Standard_Integer.hxx>
-#endif
-#ifndef _Standard_Address_HeaderFile
 #include <Standard_Address.hxx>
-#endif
-#ifndef _Standard_Boolean_HeaderFile
 #include <Standard_Boolean.hxx>
-#endif
-#ifndef _GeomAbs_Shape_HeaderFile
 #include <GeomAbs_Shape.hxx>
-#endif
 class TColStd_Array1OfReal;
 class TColStd_Array2OfReal;
 class TColgp_Array1OfPnt;
@@ -83,7 +73,7 @@ public:
   //! Get from FP the coordinates of the poles. <br>
   Standard_EXPORT   static  void GetPoles(const TColStd_Array1OfReal& FP,TColgp_Array1OfPnt2d& Poles,TColStd_Array1OfReal& Weights) ;
   //! Returns the Binomial Cnp , without testing anything. <br>
-      static  Standard_Real Bin(const Standard_Integer N,const Standard_Integer P) ;
+  Standard_EXPORT   static  Standard_Real Bin(const Standard_Integer N,const Standard_Integer P) ;
   //!  test on N >  maxbinom and build the PASCAL triangle <br>
 //!          on size N if necessary. <br>
       static  void Binomial(const Standard_Integer N) ;

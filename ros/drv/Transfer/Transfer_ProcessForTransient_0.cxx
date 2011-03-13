@@ -12,12 +12,6 @@
 #ifndef _Message_Messenger_HeaderFile
 #include <Message_Messenger.hxx>
 #endif
-#ifndef _Standard_Transient_HeaderFile
-#include <Standard_Transient.hxx>
-#endif
-#ifndef _Transfer_Binder_HeaderFile
-#include <Transfer_Binder.hxx>
-#endif
 #ifndef _Transfer_ActorOfProcessForTransient_HeaderFile
 #include <Transfer_ActorOfProcessForTransient.hxx>
 #endif
@@ -29,6 +23,9 @@
 #endif
 #ifndef _Transfer_TransferFailure_HeaderFile
 #include <Transfer_TransferFailure.hxx>
+#endif
+#ifndef _Standard_Transient_HeaderFile
+#include <Standard_Transient.hxx>
 #endif
 #ifndef _TColStd_MapTransientHasher_HeaderFile
 #include <TColStd_MapTransientHasher.hxx>
@@ -44,6 +41,9 @@
 #endif
 #ifndef _Transfer_IteratorOfProcessForTransient_HeaderFile
 #include <Transfer_IteratorOfProcessForTransient.hxx>
+#endif
+#ifndef _Transfer_Binder_HeaderFile
+#include <Transfer_Binder.hxx>
 #endif
 #ifndef _Message_Msg_HeaderFile
 #include <Message_Msg.hxx>

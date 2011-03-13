@@ -13,27 +13,13 @@
 #include <Standard_Macro.hxx>
 #endif
 
-#ifndef _OSD_Signals_HeaderFile
 #include <OSD_Signals.hxx>
-#endif
-#ifndef _Standard_Address_HeaderFile
 #include <Standard_Address.hxx>
-#endif
-#ifndef _Standard_Integer_HeaderFile
 #include <Standard_Integer.hxx>
-#endif
-#ifndef _Standard_Boolean_HeaderFile
 #include <Standard_Boolean.hxx>
-#endif
-#ifndef _Standard_Real_HeaderFile
 #include <Standard_Real.hxx>
-#endif
-#ifndef _Standard_PCharacter_HeaderFile
 #include <Standard_PCharacter.hxx>
-#endif
-#ifndef _Standard_CString_HeaderFile
 #include <Standard_CString.hxx>
-#endif
 class OSD_Error;
 class OSD_Protection;
 class OSD_Path;
@@ -80,11 +66,7 @@ public:
   }
 
   
-//!   1) Arms some floating point signals, and sets a "Handler" for them. <br>
-//!   2) Sets a "Handler" for the "Hardware" signals. <br>
-//!   For Win32 users: under VC++ you can control which method of handling <br>
-//!   exceptions is used by means of UseSETranslator method before calling <br>
-//!   SetSignal <br>
+//!   Sets signal and exception handlers. <br>
   Standard_EXPORT   static  void SetSignal(const Standard_Boolean aFloatingSignal = Standard_True) ;
   //! Returns available memory in Kilobytes. <br>
   Standard_EXPORT   static  Standard_Integer AvailableMemory() ;
@@ -114,17 +96,6 @@ public:
 //!          then this method checks whether Ctrl-Break keystroke was or <br>
 //!          not. If yes then raises Exception_CTRL_BREAK. <br>
   Standard_EXPORT   static  void ControlBreak() ;
-  //! Defines whether SetSignal must use _se_translator_function or <br>
-//!          SetUnhandledExceptionFilter and signal to catch system <br>
-//!          exceptions. The default behaviour is to use SE translator. <br>
-//!  Warning: Using SE translator method SetSignal should be called for each <br>
-//!          new created thread, while using the alternative method <br>
-//!          the exception handler is established once for the whole <br>
-//!          process and all its threads. <br>
-//!          This function takes effect only under VC++ compiler. <br>
-  Standard_EXPORT   static  void UseSETranslator(const Standard_Boolean useSE) ;
-  //! Returns the current value of the flag set by above method. <br>
-  Standard_EXPORT   static  Standard_Boolean UseSETranslator() ;
 
 
 

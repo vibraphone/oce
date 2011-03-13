@@ -34,6 +34,9 @@
 #ifndef _BRepClass3d_MapOfInter_HeaderFile
 #include <BRepClass3d_MapOfInter.hxx>
 #endif
+#ifndef _gp_Vec_HeaderFile
+#include <gp_Vec.hxx>
+#endif
 #ifndef _Handle_BRepAdaptor_HSurface_HeaderFile
 #include <Handle_BRepAdaptor_HSurface.hxx>
 #endif
@@ -43,6 +46,7 @@
 class TopoDS_Shape;
 class gp_Pnt;
 class TopoDS_Face;
+class gp_Vec;
 class BRepAdaptor_HSurface;
 class TopoDS_Shell;
 class gp_Lin;
@@ -87,6 +91,8 @@ Standard_EXPORT virtual ~BRepClass3d_SolidExplorer(){Destroy() ; }
   Standard_EXPORT   static  Standard_Boolean FindAPointInTheFace(const TopoDS_Face& F,gp_Pnt& P,Standard_Real& Param) ;
   
   Standard_EXPORT   static  Standard_Boolean FindAPointInTheFace(const TopoDS_Face& F,gp_Pnt& P,Standard_Real& u,Standard_Real& v,Standard_Real& Param) ;
+  
+  Standard_EXPORT   static  Standard_Boolean FindAPointInTheFace(const TopoDS_Face& F,gp_Pnt& P,Standard_Real& u,Standard_Real& v,Standard_Real& Param,gp_Vec& D1U,gp_Vec& D1V) ;
   
   Standard_EXPORT   static  Standard_Boolean FindAPointInTheFace(const TopoDS_Face& F,gp_Pnt& P,Standard_Real& u,Standard_Real& v) ;
   
@@ -167,6 +173,8 @@ Standard_Real myParamOnEdge;
 TopExp_Explorer myShellExplorer;
 TopExp_Explorer myFaceExplorer;
 BRepClass3d_MapOfInter myMapOfInter;
+gp_Vec staticd1u_gp_vec;
+gp_Vec staticd1v_gp_vec;
 
 
 };

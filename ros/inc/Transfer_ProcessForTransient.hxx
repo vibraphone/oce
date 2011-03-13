@@ -28,12 +28,6 @@
 #ifndef _TColStd_IndexedMapOfInteger_HeaderFile
 #include <TColStd_IndexedMapOfInteger.hxx>
 #endif
-#ifndef _Handle_Standard_Transient_HeaderFile
-#include <Handle_Standard_Transient.hxx>
-#endif
-#ifndef _Handle_Transfer_Binder_HeaderFile
-#include <Handle_Transfer_Binder.hxx>
-#endif
 #ifndef _Handle_Transfer_ActorOfProcessForTransient_HeaderFile
 #include <Handle_Transfer_ActorOfProcessForTransient.hxx>
 #endif
@@ -46,11 +40,17 @@
 #ifndef _MMgt_TShared_HeaderFile
 #include <MMgt_TShared.hxx>
 #endif
+#ifndef _Handle_Standard_Transient_HeaderFile
+#include <Handle_Standard_Transient.hxx>
+#endif
 #ifndef _Handle_TColStd_HSequenceOfTransient_HeaderFile
 #include <Handle_TColStd_HSequenceOfTransient.hxx>
 #endif
 #ifndef _Handle_Transfer_IndexedDataMapNodeOfTransferMapOfProcessForTransient_HeaderFile
 #include <Handle_Transfer_IndexedDataMapNodeOfTransferMapOfProcessForTransient.hxx>
+#endif
+#ifndef _Handle_Transfer_Binder_HeaderFile
+#include <Handle_Transfer_Binder.hxx>
 #endif
 #ifndef _Standard_CString_HeaderFile
 #include <Standard_CString.hxx>
@@ -62,17 +62,17 @@
 #include <Handle_Standard_Type.hxx>
 #endif
 class Message_Messenger;
-class Standard_Transient;
-class Transfer_Binder;
 class Transfer_ActorOfProcessForTransient;
 class Message_ProgressIndicator;
 class Interface_InterfaceError;
 class Transfer_TransferFailure;
+class Standard_Transient;
 class TColStd_MapTransientHasher;
 class TColStd_HSequenceOfTransient;
 class Transfer_TransferMapOfProcessForTransient;
 class Transfer_IndexedDataMapNodeOfTransferMapOfProcessForTransient;
 class Transfer_IteratorOfProcessForTransient;
+class Transfer_Binder;
 class Message_Msg;
 class Interface_Check;
 class Standard_Type;
@@ -99,7 +99,7 @@ public:
   
   Standard_EXPORT     Handle_Transfer_ActorOfProcessForTransient Actor() const;
   
-  Standard_EXPORT     Handle_Transfer_Binder Find(const Handle(Standard_Transient)& start) const;
+  Standard_EXPORT    const Handle_Transfer_Binder& Find(const Handle(Standard_Transient)& start) const;
   
   Standard_EXPORT     Standard_Boolean IsBound(const Handle(Standard_Transient)& start) const;
   
@@ -228,8 +228,6 @@ protected:
 private: 
 
   
-  Standard_EXPORT     Handle_Transfer_Binder FindAndMask(const Handle(Standard_Transient)& start) ;
-  
   Standard_EXPORT     Handle_Transfer_Binder TransferProduct(const Handle(Standard_Transient)& start) ;
 
 Standard_Boolean theerrh;
@@ -239,9 +237,6 @@ Standard_Integer thelevel;
 Standard_Integer therootl;
 Standard_Boolean therootm;
 TColStd_IndexedMapOfInteger theroots;
-Handle_Standard_Transient thelastobj;
-Handle_Transfer_Binder thelastbnd;
-Standard_Integer theindex;
 Handle_Transfer_ActorOfProcessForTransient theactor;
 Transfer_TransferMapOfProcessForTransient themap;
 Handle_Message_ProgressIndicator myProgress;

@@ -12,12 +12,6 @@
 #ifndef _Message_Messenger_HeaderFile
 #include <Message_Messenger.hxx>
 #endif
-#ifndef _Transfer_Finder_HeaderFile
-#include <Transfer_Finder.hxx>
-#endif
-#ifndef _Transfer_Binder_HeaderFile
-#include <Transfer_Binder.hxx>
-#endif
 #ifndef _Transfer_ActorOfProcessForFinder_HeaderFile
 #include <Transfer_ActorOfProcessForFinder.hxx>
 #endif
@@ -29,6 +23,9 @@
 #endif
 #ifndef _Transfer_TransferFailure_HeaderFile
 #include <Transfer_TransferFailure.hxx>
+#endif
+#ifndef _Transfer_Finder_HeaderFile
+#include <Transfer_Finder.hxx>
 #endif
 #ifndef _Transfer_FindHasher_HeaderFile
 #include <Transfer_FindHasher.hxx>
@@ -44,6 +41,9 @@
 #endif
 #ifndef _Transfer_IteratorOfProcessForFinder_HeaderFile
 #include <Transfer_IteratorOfProcessForFinder.hxx>
+#endif
+#ifndef _Transfer_Binder_HeaderFile
+#include <Transfer_Binder.hxx>
 #endif
 #ifndef _Message_Msg_HeaderFile
 #include <Message_Msg.hxx>

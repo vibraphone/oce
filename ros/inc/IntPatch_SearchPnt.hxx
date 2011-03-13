@@ -13,11 +13,14 @@
 #include <Standard_Macro.hxx>
 #endif
 
-#ifndef _Intf_Interference_HeaderFile
-#include <Intf_Interference.hxx>
+#ifndef _Standard_Boolean_HeaderFile
+#include <Standard_Boolean.hxx>
 #endif
 #ifndef _Standard_Integer_HeaderFile
 #include <Standard_Integer.hxx>
+#endif
+#ifndef _Intf_Interference_HeaderFile
+#include <Intf_Interference.hxx>
 #endif
 class Standard_OutOfRange;
 class IntPatch_Polygo;
@@ -77,6 +80,13 @@ private:
   Standard_EXPORT     void Intersect(const gp_Pnt2d& BegO,const gp_Pnt2d& EndO,const gp_Pnt2d& BegT,const gp_Pnt2d& EndT) ;
 
 
+Standard_Boolean oClos;
+Standard_Boolean tClos;
+Standard_Integer iObje1;
+Standard_Integer iObje2;
+Standard_Integer nbso;
+Standard_Boolean BeginOfNotClosedObje1;
+Standard_Boolean BeginOfNotClosedObje2;
 
 
 };

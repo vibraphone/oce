@@ -90,6 +90,11 @@ public:
 //!          into account. For subshapes of the type <until> no rebuild <br>
 //!          and futher exploring are done. <br>
   Standard_EXPORT   virtual  TopoDS_Shape Apply(const TopoDS_Shape& shape,const TopAbs_ShapeEnum until = TopAbs_SHAPE) ;
+  //! Adds mapping of \a theOther into \a this. <br>
+//!          Thus, \a this will contain a cumulative map. This can be used, <br>
+//!          for example, for concurrent shape processing and then reduction <br>
+//!          (i.e. accumulation of results in a single object). <br>
+  Standard_EXPORT   virtual  void Join(const Handle(BRepTools_ReShape)& theOther) ;
   //!Returns (modifiable) the flag which defines whether Location of shape take into account <br>
 //!         during replacing shapes. <br>
   Standard_EXPORT     Standard_Boolean& ModeConsiderLocation() ;

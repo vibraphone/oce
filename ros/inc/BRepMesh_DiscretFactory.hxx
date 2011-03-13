@@ -25,6 +25,9 @@
 #ifndef _TCollection_AsciiString_HeaderFile
 #include <TCollection_AsciiString.hxx>
 #endif
+#ifndef _Plugin_MapOfFunctions_HeaderFile
+#include <Plugin_MapOfFunctions.hxx>
+#endif
 #ifndef _Standard_Real_HeaderFile
 #include <Standard_Real.hxx>
 #endif
@@ -86,6 +89,7 @@ TColStd_MapOfAsciiString myNames;
 TCollection_AsciiString myFixedNames[1];
 TCollection_AsciiString myDefaultName;
 TCollection_AsciiString myFunctionName;
+Plugin_MapOfFunctions myFactoryMethods;
 
 
 private:

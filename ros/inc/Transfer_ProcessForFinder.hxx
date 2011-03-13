@@ -28,12 +28,6 @@
 #ifndef _TColStd_IndexedMapOfInteger_HeaderFile
 #include <TColStd_IndexedMapOfInteger.hxx>
 #endif
-#ifndef _Handle_Transfer_Finder_HeaderFile
-#include <Handle_Transfer_Finder.hxx>
-#endif
-#ifndef _Handle_Transfer_Binder_HeaderFile
-#include <Handle_Transfer_Binder.hxx>
-#endif
 #ifndef _Handle_Transfer_ActorOfProcessForFinder_HeaderFile
 #include <Handle_Transfer_ActorOfProcessForFinder.hxx>
 #endif
@@ -46,11 +40,17 @@
 #ifndef _MMgt_TShared_HeaderFile
 #include <MMgt_TShared.hxx>
 #endif
+#ifndef _Handle_Transfer_Finder_HeaderFile
+#include <Handle_Transfer_Finder.hxx>
+#endif
 #ifndef _Handle_Transfer_HSequenceOfFinder_HeaderFile
 #include <Handle_Transfer_HSequenceOfFinder.hxx>
 #endif
 #ifndef _Handle_Transfer_IndexedDataMapNodeOfTransferMapOfProcessForFinder_HeaderFile
 #include <Handle_Transfer_IndexedDataMapNodeOfTransferMapOfProcessForFinder.hxx>
+#endif
+#ifndef _Handle_Transfer_Binder_HeaderFile
+#include <Handle_Transfer_Binder.hxx>
 #endif
 #ifndef _Standard_CString_HeaderFile
 #include <Standard_CString.hxx>
@@ -65,17 +65,17 @@
 #include <Handle_Standard_Type.hxx>
 #endif
 class Message_Messenger;
-class Transfer_Finder;
-class Transfer_Binder;
 class Transfer_ActorOfProcessForFinder;
 class Message_ProgressIndicator;
 class Interface_InterfaceError;
 class Transfer_TransferFailure;
+class Transfer_Finder;
 class Transfer_FindHasher;
 class Transfer_HSequenceOfFinder;
 class Transfer_TransferMapOfProcessForFinder;
 class Transfer_IndexedDataMapNodeOfTransferMapOfProcessForFinder;
 class Transfer_IteratorOfProcessForFinder;
+class Transfer_Binder;
 class Message_Msg;
 class Interface_Check;
 class Standard_Transient;
@@ -103,7 +103,7 @@ public:
   
   Standard_EXPORT     Handle_Transfer_ActorOfProcessForFinder Actor() const;
   
-  Standard_EXPORT     Handle_Transfer_Binder Find(const Handle(Transfer_Finder)& start) const;
+  Standard_EXPORT    const Handle_Transfer_Binder& Find(const Handle(Transfer_Finder)& start) const;
   
   Standard_EXPORT     Standard_Boolean IsBound(const Handle(Transfer_Finder)& start) const;
   
@@ -232,8 +232,6 @@ protected:
 private: 
 
   
-  Standard_EXPORT     Handle_Transfer_Binder FindAndMask(const Handle(Transfer_Finder)& start) ;
-  
   Standard_EXPORT     Handle_Transfer_Binder TransferProduct(const Handle(Transfer_Finder)& start) ;
 
 Standard_Boolean theerrh;
@@ -243,9 +241,6 @@ Standard_Integer thelevel;
 Standard_Integer therootl;
 Standard_Boolean therootm;
 TColStd_IndexedMapOfInteger theroots;
-Handle_Transfer_Finder thelastobj;
-Handle_Transfer_Binder thelastbnd;
-Standard_Integer theindex;
 Handle_Transfer_ActorOfProcessForFinder theactor;
 Transfer_TransferMapOfProcessForFinder themap;
 Handle_Message_ProgressIndicator myProgress;

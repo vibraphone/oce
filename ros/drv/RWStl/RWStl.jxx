@@ -4,6 +4,7 @@
 #ifndef _OSD_Path_HeaderFile
 #include <OSD_Path.hxx>
 #endif
-#ifndef _RWStl_HeaderFile
-#include <RWStl.hxx>
+#ifndef _Message_ProgressIndicator_HeaderFile
+#include <Message_ProgressIndicator.hxx>
 #endif
+#include <RWStl.hxx>
