@@ -40,11 +40,13 @@ IF( "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 2.5 )
 	MESSAGE( FATAL_ERROR "CMake >= 2.6.0 required" )
 ENDIF( "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 2.5 )
 
-IF( NOT DEFINED ${PROJECT_NAME}_BUILD_TYPE )
-	SET( ${PROJECT_NAME}_BUILD_TYPE "Release" CACHE STRING "Build type" ) # By default set release build
-ENDIF( NOT DEFINED ${PROJECT_NAME}_BUILD_TYPE )
-SET( CMAKE_BUILD_TYPE ${${PROJECT_NAME}_BUILD_TYPE} CACHE INTERNAL "Build type,
-	immutable" FORCE )
+IF (NOT MSVC)
+	IF( NOT DEFINED ${PROJECT_NAME}_BUILD_TYPE )
+		SET( ${PROJECT_NAME}_BUILD_TYPE "Release" CACHE STRING "Build type" ) # By default set release build
+	ENDIF( NOT DEFINED ${PROJECT_NAME}_BUILD_TYPE )
+	SET( CMAKE_BUILD_TYPE ${${PROJECT_NAME}_BUILD_TYPE} CACHE INTERNAL "Build type,
+		immutable" FORCE )
+ENDIF(NOT MSVC)
 
 OPTION_WITH_DEFAULT( ${PROJECT_NAME}_BUILD_SHARED_LIB "Build shared ${PROJECT_NAME} libs" ON )
 OPTION_WITH_DEFAULT( ${PROJECT_NAME}_MODEL "Build model components" ON )
@@ -55,7 +57,16 @@ OPTION_WITH_DEFAULT( ${PROJECT_NAME}_VISUALISATION "Build visualisation componen
 OPTION_WITH_DEFAULT( ${PROJECT_NAME}_VISUALISATION_FULL "Build full visualisation component" ON )
 OPTION_WITH_DEFAULT( ${PROJECT_NAME}_WITH_GL2PS "Build with GL2PS" OFF )
 OPTION_WITH_DEFAULT( ${PROJECT_NAME}_WITH_FREEIMAGE "Build with FreeImage" OFF )
+OPTION_WITH_DEFAULT( ${PROJECT_NAME}_EXTRA_WARNINGS "Enable Maximum Warnings Level" OFF )
+# MSVC specific options
+IF(MSVC)
+   OPTION_WITH_DEFAULT( ${PROJECT_NAME}_USE_MSVC_EXPRESS "Use a Visual C++ express IDE" OFF )
+ENDIF(MSVC)  
 
+#
+
+MARK_AS_ADVANCED(${PROJECT_NAME}_EXTRA_WARNINGS)
+  
 IF( NOT DEFINED ${PROJECT_NAME}_MULTITHREAD_LIBRARY)
 	SET( ${PROJECT_NAME}_MULTITHREAD_LIBRARY "NONE" CACHE STRING "(values are: NONE TBB OPENMP)" )
 ENDIF( NOT DEFINED ${PROJECT_NAME}_MULTITHREAD_LIBRARY)
@@ -96,7 +107,6 @@ ELSE( ${PROJECT_NAME}_BUILD_SHARED_LIB )
 	ENDIF( WIN32 )
 ENDIF( ${PROJECT_NAME}_BUILD_SHARED_LIB )
 
-#
 # Check components dependencies
 #
 SET(${PROJECT_NAME}_FOUNDATION TRUE)
@@ -154,7 +164,10 @@ IF (NOT WIN32)
 ENDIF (NOT WIN32)
 
 IF(${PROJECT_NAME}_VISUALISATION_FULL)
-	FIND_LIBRARY( X11_Xmu_LIB Xmu PATHS /usr/openwin/lib )
+	IF (NOT WIN32)
+		FIND_LIBRARY( X11_Xmu_LIB Xmu PATHS /usr/openwin/lib )
+	ENDIF(NOT WIN32)
+
 	IF (NOT APPLE)
 	  FIND_PACKAGE(OpenGL REQUIRED)
 	ELSE (NOT APPLE)
@@ -436,16 +449,12 @@ ENDIF(NOT WIN32)
 # Check 32/64 bit platform #
 ############################
 IF (${CMAKE_SIZEOF_VOID_P} MATCHES "8") # It is 64bit, otherwise 32 bit systems match 4
-	SET(${PROJECT_NAME}_64BIT ON CACHE BOOL "Build 64bit libraries")
-ELSE (${CMAKE_SIZEOF_VOID_P} MATCHES "8")
-	SET(${PROJECT_NAME}_64BIT OFF CACHE BOOL "Build 64bit libraries")
-ENDIF(${CMAKE_SIZEOF_VOID_P} MATCHES "8")
-
-SET(BIT 32)
-IF (${PROJECT_NAME}_64BIT)
 	ADD_DEFINITIONS(-D_OCC64)
 	SET(BIT 64)
-ENDIF (${PROJECT_NAME}_64BIT)
+ELSE (${CMAKE_SIZEOF_VOID_P} MATCHES "8")
+  SET(BIT 32)
+ENDIF(${CMAKE_SIZEOF_VOID_P} MATCHES "8")
+
 MESSAGE(STATUS "Build ${BIT}bit")
 
 #######################################################
@@ -475,6 +484,19 @@ ENDIF(UNIX)
 # TODO: better detection of different Unices (Linux, Solaris etc.)
 # TODO: add CXX compiler flags for each platform
 
+# Enable Extra warnings for each compiler
+IF( ${PROJECT_NAME}_EXTRA_WARNINGS)
+  IF(MSVC)
+    ADD_DEFINITIONS("/W4 /wd4100")
+  ENDIF(MSVC)
+  IF(CMAKE_COMPILER_IS_GNUCXX)
+    ADD_DEFINITIONS("-Wall")
+  ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+  IF(BORLAND)
+    #TODO
+  ENDIF(BORLAND)
+ENDIF(${PROJECT_NAME}_EXTRA_WARNINGS)
+
 ################################################
 # Define output path for generated libraries:  #
 # platform/compiler-build_type-bits           #
@@ -486,7 +508,7 @@ ENDIF(UNIX)
 IF(WIN32)
     IF(${MSVC}) # The compiler used is MSVC
         MESSAGE(STATUS "Found MSVC compiler: ${MSVC} ${MSVC_VERSION}")
-        SET(LIBRARY_OUTPUT_PATH win${BIT}/${MSVC_VERSION}-${CMAKE_BUILD_TYPE}/bin)
+        SET(LIBRARY_OUTPUT_PATH win${BIT}/${MSVC_VERSION}/bin)
     ELSE(${MSVC})
         SET(LIBRARY_OUTPUT_PATH win${BIT}/bin/${CMAKE_BUILD_TYPE})
     ENDIF(${MSVC})
@@ -504,6 +526,22 @@ IF(MINGW)
 	# For the file Message_MsgFile.cxx of TKernel we must additionally set the __TCollection_DLL define to resolve the needed HashCode() method
 	SET_SOURCE_FILES_PROPERTIES("src/Message/Message_MsgFile.cxx" PROPERTIES COMPILE_FLAGS "-D__Message_DLL -D__TCollection_DLL")
 ENDIF(MINGW)
+
+# DISABLE SECURE CRT WARNINGS AND OTHER MS CRT SPECIFC THINGS
+IF (MSVC)
+   ADD_DEFINITIONS("/D_CRT_SECURE_NO_WARNINGS")
+ENDIF(MSVC)
+   
+IF(MSVC)
+  IF(NOT ${PROJECT_NAME}_USE_MSVC_EXPRESS)
+     #Use solution folders.
+     SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
+     SET(USE_SOLUTION_FOLDERS TRUE)
+  ELSE( NOT ${PROJECT_NAME}_USE_MSVC_EXPRESS)
+     SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS OFF)
+  ENDIF( NOT ${PROJECT_NAME}_USE_MSVC_EXPRESS)
+
+ENDIF(MSVC)
 
 # Libraries are installed by default in /usr/local/lib on UNIX
 # based platforms and c:/${PROJECT_NAME}-VERSION/lib on windows based
@@ -561,57 +599,62 @@ IF(${PROJECT_NAME}_DRAW)
 		${CMAKE_CURRENT_BINARY_DIR}/DrawDefault @ONLY )
 ENDIF(${PROJECT_NAME}_DRAW)
 
-MACRO(PROCESS_OCC_MODULE modules)
+MACRO(PROCESS_OCC_MODULE modulename modules)
 	FOREACH(module ${modules})
 		SET(TOOLKIT_MODULES "")
 		SET(TOOLKIT_DEPENDS "")
 		SET(TOOLKIT_INCLUDE_DIRECTORIES "")
 		SET(TOOLKIT_LIBS "")
 		ADD_SUBDIRECTORY( adm/cmake/${module} )
+		
+		IF (USE_SOLUTION_FOLDERS)
+      SET_TARGET_PROPERTIES(${module} PROPERTIES FOLDER ${modulename} )
+    ENDIF(USE_SOLUTION_FOLDERS)
+    
 	ENDFOREACH(module ${modules})
-ENDMACRO(PROCESS_OCC_MODULE modules)
+ENDMACRO(PROCESS_OCC_MODULE modulename modules)
 ####################################################################################
 # Process modules of each ToolKit                                                  #
 ####################################################################################
 # Foundation
-PROCESS_OCC_MODULE( "TKernel;TKMath;TKAdvTools" )
+PROCESS_OCC_MODULE( "Kernel" "TKernel;TKMath;TKAdvTools" )
 
 # Modeling Data
 IF (${PROJECT_NAME}_MODEL)
-	PROCESS_OCC_MODULE( "TKG2d;TKG3d;TKGeomBase;TKBRep" )
+	PROCESS_OCC_MODULE( "Modeling Data" "TKG2d;TKG3d;TKGeomBase;TKBRep" )
 ENDIF (${PROJECT_NAME}_MODEL)
 
 # Modeling Algorithms
 IF (${PROJECT_NAME}_MODEL)
-	PROCESS_OCC_MODULE( "TKGeomAlgo;TKTopAlgo;TKPrim;TKBO;TKHLR;TKMesh;TKShHealing;TKXMesh;TKBool;TKFillet;TKFeat;TKOffset" )
+	PROCESS_OCC_MODULE( "Modeling Algorithms" "TKGeomAlgo;TKTopAlgo;TKPrim;TKBO;TKHLR;TKMesh;TKShHealing;TKXMesh;TKBool;TKFillet;TKFeat;TKOffset" )
 ENDIF (${PROJECT_NAME}_MODEL)
 
 # Visualisation
 IF(${PROJECT_NAME}_VISUALISATION)
-	PROCESS_OCC_MODULE( "TKService;TKV2d;TKV3d" )
+	PROCESS_OCC_MODULE( "Visualization" "TKService;TKV2d;TKV3d" )
 ENDIF(${PROJECT_NAME}_VISUALISATION)
 IF(${PROJECT_NAME}_VISUALISATION_FULL)
-	PROCESS_OCC_MODULE( "TKOpenGl;TKMeshVS;TKNIS;TKVoxel" )
+	PROCESS_OCC_MODULE( "Visualizatino" "TKOpenGl;TKMeshVS;TKNIS;TKVoxel" )
 ENDIF(${PROJECT_NAME}_VISUALISATION_FULL)
 
 # Application framework
 IF(${PROJECT_NAME}_OCAF)
-	PROCESS_OCC_MODULE( "TKCDF;PTKernel;TKLCAF;FWOSPlugin;TKPShape;TKCAF;TKBinL;TKXmlL;TKPLCAF;TKTObj;TKShapeSchema;TKBin;TKXml;TKPCAF;TKBinTObj;TKXmlTObj;TKStdLSchema;TKStdSchema" )
+	PROCESS_OCC_MODULE( "OCAF" "TKCDF;PTKernel;TKLCAF;FWOSPlugin;TKPShape;TKCAF;TKBinL;TKXmlL;TKPLCAF;TKTObj;TKShapeSchema;TKBin;TKXml;TKPCAF;TKBinTObj;TKXmlTObj;TKStdLSchema;TKStdSchema" )
 ENDIF(${PROJECT_NAME}_OCAF)
 
 # Data exchange
 IF(${PROJECT_NAME}_DATAEXCHANGE)
-	PROCESS_OCC_MODULE( "TKVRML;TKXCAF;TKSTL;TKXSBase;TKXCAFSchema;TKXmlXCAF;TKBinXCAF;TKSTEPBase;TKIGES;TKSTEPAttr;TKSTEP209;TKXDEIGES;TKSTEP;TKXDESTEP" )
+	PROCESS_OCC_MODULE( "Data Exchange" "TKVRML;TKXCAF;TKSTL;TKXSBase;TKXCAFSchema;TKXmlXCAF;TKBinXCAF;TKSTEPBase;TKIGES;TKSTEPAttr;TKSTEP209;TKXDEIGES;TKSTEP;TKXDESTEP" )
 ENDIF(${PROJECT_NAME}_DATAEXCHANGE)
 
 # Draw
 IF(${PROJECT_NAME}_DRAW)
-	PROCESS_OCC_MODULE( "TKDraw;TKTopTest;TKViewerTest;TKXSDRAW;TKDCAF;TKXDEDRAW;TKTObjDRAW" )
+	PROCESS_OCC_MODULE( "Draw" "TKDraw;TKTopTest;TKViewerTest;TKXSDRAW;TKDCAF;TKXDEDRAW;TKTObjDRAW" )
 ENDIF(${PROJECT_NAME}_DRAW)
 
 # DRAWEXE application
 IF(${PROJECT_NAME}_DRAW)
-	PROCESS_OCC_MODULE( DRAWEXE )
+	PROCESS_OCC_MODULE( "Draw" DRAWEXE )
 ENDIF(${PROJECT_NAME}_DRAW)
 
 ###########
