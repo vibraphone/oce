@@ -615,6 +615,7 @@ ENDMACRO(PROCESS_OCC_MODULE modulename modules)
 # Process modules of each ToolKit                                                  #
 ####################################################################################
 SET(PROCESSED_TOOLKITS)
+FILE(GLOB ALL_PUBLIC_HEADER_FILES ${${PROJECT_NAME}_SOURCE_DIR}/inc/*.*)
 
 # Foundation
 SET(FOUNDATION_TOOLKITS "TKernel;TKMath;TKAdvTools")
