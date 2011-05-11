@@ -1,6 +1,7 @@
 
 MESSAGE(STATUS "Processing ToolKit: ${TOOLKIT} (${TOOLKIT_MODULES})")
 SET(TOOLKIT_SOURCE_FILES)
+SET(TOOLKIT_HEADER_FILES)
 IF(DEFINED TOOLKIT_INCLUDE_DIRECTORIES)
 	INCLUDE_DIRECTORIES(${TOOLKIT_INCLUDE_DIRECTORIES})
 ENDIF(DEFINED TOOLKIT_INCLUDE_DIRECTORIES)
@@ -11,21 +12,41 @@ FOREACH(MODULE ${TOOLKIT_MODULES})
 		${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.c
 		${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.cxx
 		${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.c)
-	#MESSAGE(STATUS "${source_files}")
+
+	# Makes the configure process really long
+	FILE(GLOB header_files
+		${${PROJECT_NAME}_SOURCE_DIR}/inc/Handle_${MODULE}.hxx
+		${${PROJECT_NAME}_SOURCE_DIR}/inc/Handle_${MODULE}_*.hxx
+		${${PROJECT_NAME}_SOURCE_DIR}/inc/${MODULE}.hxx
+		${${PROJECT_NAME}_SOURCE_DIR}/inc/${MODULE}_*.hxx
+		${${PROJECT_NAME}_SOURCE_DIR}/inc/Handle_${MODULE}.h
+		${${PROJECT_NAME}_SOURCE_DIR}/inc/Handle_${MODULE}_*.h
+		${${PROJECT_NAME}_SOURCE_DIR}/inc/${MODULE}.h
+		${${PROJECT_NAME}_SOURCE_DIR}/inc/${MODULE}_*.h
+		${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.hxx
+		${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.lxx
+		${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.gxx
+		${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.h
+		${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.hxx
+		${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.ixx
+		${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.jxx
+		${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.h)
 
 	IF (WIN32)
 		# For compilers under Windows a define must be set per file to correctly set the export macro
 		SET_SOURCE_FILES_PROPERTIES(${source_files} PROPERTIES COMPILE_FLAGS "-D__${MODULE}_DLL")
 	ENDIF(WIN32)
 
-	SOURCE_GROUP (${MODULE} FILES ${source_files}) 
+	SOURCE_GROUP(${MODULE} FILES ${source_files})
+	SOURCE_GROUP(${MODULE} FILES ${header_files})
 
 	# append these source files to the list of source files of the toolkit
-	SET(TOOLKIT_SOURCE_FILES ${TOOLKIT_SOURCE_FILES} ${source_files}) 
+	SET(TOOLKIT_SOURCE_FILES ${TOOLKIT_SOURCE_FILES} ${source_files})
+	LIST(APPEND TOOLKIT_HEADER_FILES ${header_files})
 	# required include paths
 	INCLUDE_DIRECTORIES(${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE} ${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE})
 ENDFOREACH(MODULE ${TOOLKIT_MODULES})
-ADD_LIBRARY(${TOOLKIT} ${${PROJECT_NAME}_LIBRARY_TYPE} ${TOOLKIT_SOURCE_FILES})
+ADD_LIBRARY(${TOOLKIT} ${${PROJECT_NAME}_LIBRARY_TYPE} ${TOOLKIT_SOURCE_FILES} ${TOOLKIT_HEADER_FILES})
 # TODO Add current toolkit header files into a source group?
 # Add target specific locations of *.lxx and *.ixx files
 SET_TARGET_PROPERTIES(${TOOLKIT} PROPERTIES
