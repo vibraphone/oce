@@ -214,7 +214,12 @@ Standard_Boolean Graphic3d_GraphicDevice::ShrIsDefined (Standard_CString& aShr) 
 #if defined(__hpux) || defined(HPUX)
     buffString = buffString + "/lib/libTKOpenGl.sl";
 #elif defined(WNT)
+#if !defined(_DEBUG) || !defined(_MSC_VER)
     buffString = buffString + "/TKOpenGl.dll";
+#else
+	// @todo When MSVC has Config.h, use CMAKE_DEBUG_SUFFIX here
+	buffString = buffString + "/TKOpenGld.dll";
+#endif
 #elif defined(__APPLE__)
     buffString = buffString + "/lib/libTKOpenGl.dylib";
 #else

@@ -51,7 +51,14 @@ void Graphic3d_WNTGraphicDevice::SetGraphicDriver ()
   OSD_Function new_GLGraphicDriver;
   Standard_CString TheShr = getenv("CSF_GraphicShr");
   if ( ! TheShr || ( strlen( TheShr ) == 0 ) )
-    TheShr = "TKOpenGl.dll";
+  {
+#if !defined(_DEBUG) || !defined(_MSC_VER)
+		TheShr = "TKOpenGl.dll";
+#else
+	// @todo When MSVC has Config.h, use CMAKE_DEBUG_SUFFIX here
+		TheShr = "TKOpenGld.dll";
+#endif
+  }
 
   MySharedLibrary.SetName ( TheShr );
   Result = MySharedLibrary.DlOpen (OSD_RTLD_LAZY);

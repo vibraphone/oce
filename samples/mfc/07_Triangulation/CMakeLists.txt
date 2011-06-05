@@ -1,8 +1,15 @@
 PROJECT(Triangulation)
+SET(CMAKE_MFC_FLAG 2) 
 
-FILE(GLOB SRCS src/*.cpp)
+FILE(GLOB SRCS src/*.c*)
 FILE(GLOB HEADERS src/*.h)
 FILE(GLOB RES res/*.rc)
 SET(PCH src/StdAfx.h src/StdAfx.cpp)
 
+INCLUDE_DIRECTORIES(.)
+INCLUDE_DIRECTORIES(src)
+INCLUDE_DIRECTORIES(../Common/)
+
 ADD_EXECUTABLE(Triangulation WIN32 ${SRCS} ${HEADERS} ${PCH} ${RES}) 
+TARGET_LINK_LIBRARIES(Triangulation mfcsample)
+SETUP_EXAMPLE(Triangulation)

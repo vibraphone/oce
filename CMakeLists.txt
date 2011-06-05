@@ -27,6 +27,9 @@ SET(OCE_ABI_VERSION 0.0.0)
 # Set the minimum version of cmake required to 2.6
 CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 
+# Global variable for sub-projects (otherwise PROJECT_NAME) is redefined
+SET(ROOT_PROJECT_NAME ${PROJECT_NAME})
+
 # Define helper macro OPTION_WITH_DEFAULT
 MACRO( OPTION_WITH_DEFAULT OPTION_NAME OPTION_STRING OPTION_DEFAULT )
         IF( NOT DEFINED ${OPTION_NAME} )
@@ -733,6 +736,8 @@ MACRO(PROCESS_OCC_MODULE modulename modules)
     
 	ENDFOREACH(module ${modules})
 ENDMACRO(PROCESS_OCC_MODULE modulename modules)
+
+
 ####################################################################################
 # Process modules of each ToolKit                                                  #
 ####################################################################################
@@ -778,7 +783,7 @@ IF(${PROJECT_NAME}_DRAW)
 ENDIF(${PROJECT_NAME}_DRAW)
 
 IF(${PROJECT_NAME}_SUPPORTS_MFC AND ${PROJECT_NAME}_SAMPLES_MFC)
-  SUBDIRS(samples/mfc)
+  ADD_SUBDIRECTORY(samples/mfc)
 ENDIF()
 
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/ProjectConfig.cmake.in 

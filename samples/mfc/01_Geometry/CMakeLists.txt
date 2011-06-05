@@ -1,8 +1,16 @@
 PROJECT(Geometry)
 
-FILE(GLOB SRCS src/*.cpp)
+SET(CMAKE_MFC_FLAG 2) 
+FILE(GLOB SRCS src/*.c*)
+FILE(GLOB SESSION_SRCS src/*.cpp src/ISession2d/*.cpp)
 FILE(GLOB HEADERS src/*.h)
 FILE(GLOB RES res/*.rc)
 SET(PCH src/StdAfx.h src/StdAfx.cpp)
 
-ADD_EXECUTABLE(Geometry WIN32 ${SRCS} ${HEADERS} ${PCH} ${RES}) 
+INCLUDE_DIRECTORIES(src)
+INCLUDE_DIRECTORIES(src/ISession2d)
+INCLUDE_DIRECTORIES(../Common/)
+
+ADD_EXECUTABLE(Geometry WIN32 ${SRCS} ${SESSION_SRCS} ${HEADERS} ${PCH} ${RES}) 
+TARGET_LINK_LIBRARIES(Geometry mfcsample)
+SETUP_EXAMPLE(Geometry)

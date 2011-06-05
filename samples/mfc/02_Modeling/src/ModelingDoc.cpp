@@ -15,6 +15,10 @@
 #include <AIS_ListOfInteractive.hxx>
 #include <AIS_ListIteratorOfListOfInteractive.hxx>
 #include <TColStd_Array2OfReal.hxx>
+#include <BRepPrimAPI_MakeCylinder.hxx>
+#include <TopExp_Explorer.hxx>
+#include <Geom_Plane.hxx>
+#include <BRepTools.hxx>
 #include <OCC_MainFrame.h>
 
 Handle(AIS_Shape) AIS1;
