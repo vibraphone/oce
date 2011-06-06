@@ -1,0 +1,186 @@
+/*
+ The content of this file is subject to the Open CASCADE Technology 
+ Public License Version 6.2 (the "License"). You may not use the content 
+ of this file except in compliance with the License. 
+ Please obtain a copy of the License at http://www.opencascade.org and 
+ read it completely before using this file. 
+ 
+ The Initial Developer of the Original Code is Emmanuel Valentin, 
+ The Original Code is copyright © SmoothSofts, 2009. All rights reserved. 
+ 
+ The software Open CASCADE Technology and all software distributed 
+ under the License are distributed on an "AS IS" basis, without warranty of 
+ any kind, and the Initial Developer hereby disclaims all such warranties, 
+ including without limitation, any warranties of merchantability, fitness 
+ for a particular purpose or non-infringement. Please see the License for the 
+ specific terms and conditions governing rights and limitations under the License" 
+ */
+
+#include "NSGLContextWrapper.h"
+#include <OpenGL/CGLTypes.h>
+#include <AppKit/NSOpenGL.h>
+
+#define POOL_ON	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init]; 
+#define POOL_OFF [pool release];
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void*			NSGLChoosePixelFormat(UInt32* attribs) {
+	POOL_ON
+	
+	NSOpenGLPixelFormat* format = [[NSOpenGLPixelFormat alloc] initWithAttributes:(const NSOpenGLPixelFormatAttribute*)attribs];
+
+	POOL_OFF
+	return format;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void			NSGLDescribePixelFormat(void* pf, GLint* value, UInt32 attrib, GLint screen){
+	POOL_ON
+	
+	NSOpenGLPixelFormat* format = (NSOpenGLPixelFormat*)pf;
+	[format getValues:value forAttribute:attrib forVirtualScreen:screen];
+
+	POOL_OFF
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void			NSGLDestroyPixelFormat(void* pf){
+	POOL_ON
+	
+	NSOpenGLPixelFormat* format = (NSOpenGLPixelFormat*)pf;
+	[format release];
+	
+	POOL_OFF
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void*			NSGLContextCreate( void* pf, void* shareCG ) {
+	GLint swapInt = 1;
+	POOL_ON
+
+	NSOpenGLContext* ctx = [[NSOpenGLContext alloc]initWithFormat:(NSOpenGLPixelFormat*)pf shareContext:shareCG];
+	[ctx setValues:(GLint*)&swapInt forParameter:NSOpenGLCPSwapInterval]; // set to vbl sync
+	
+	POOL_OFF
+	
+	return ctx;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void			NSGLSetDrawable(void* CG, void* drawable ){
+	NSOpenGLContext* ctx = (NSOpenGLContext*)CG;
+	NSView* view = (NSView*) drawable;
+	POOL_ON
+
+	[ctx setView: view];
+	
+	POOL_OFF
+}
+
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void			NSGLMakeCurrent(void* CG, void* drawable) {
+	NSOpenGLContext* ctx = (NSOpenGLContext*)CG;
+	NSView* view = (NSView*) drawable;
+	POOL_ON
+	
+	[ctx setView: view];
+	[ctx makeCurrentContext];
+	
+	POOL_OFF
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void			NSGLClearDrawable(void* CG){
+	NSOpenGLContext* ctx = (NSOpenGLContext*)CG;
+	POOL_ON
+	
+	[ctx clearDrawable];
+	
+	POOL_OFF
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void			NSGLDestroyContext(void* CG){
+	NSOpenGLContext* ctx = (NSOpenGLContext*)CG;
+	POOL_ON
+	
+	[ctx release];
+	
+	POOL_OFF
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+CGLContextObj	NSGLCGLContextObj(void* CG) {
+	NSOpenGLContext* ctx = (NSOpenGLContext*)CG;
+	POOL_ON
+	
+	CGLContextObj obj = [ctx CGLContextObj];
+	
+	POOL_OFF
+	
+	return obj;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void			NSGLMakeCurrentContext(void* CG){
+	NSOpenGLContext* ctx = (NSOpenGLContext*)CG;
+	POOL_ON
+	
+	[ctx makeCurrentContext];
+	
+	POOL_OFF
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void*			NSGLGetCurrentContext(){
+	return [NSOpenGLContext currentContext];
+}
+
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void*			NSGLGetCurrentDrawable(void* CG) {
+	NSOpenGLContext* ctx = (NSOpenGLContext*)CG;
+	return [ctx view];
+	
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void			NSGLFlushBuffer(void* CG) {
+	NSOpenGLContext* ctx = (NSOpenGLContext*)CG;
+	[ctx flushBuffer];
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------------------------------------------------------
+void			NSGLUpdate(void* CG) {
+	NSOpenGLContext* ctx = (NSOpenGLContext*)CG;
+	[ctx update];
+}

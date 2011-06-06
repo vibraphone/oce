@@ -1,0 +1,121 @@
+//
+//  OCNISView.m
+//  OpenCascade
+//
+//  Created by Emmanuel Valentin on 27/01/09.
+//  Copyright 2009 Smooth Softs. All rights reserved.
+//
+
+#import <OCNISView.h>
+#import <OSX_GraphicDevice.hxx>
+#import <OSX_Window.hxx>
+#import <OCGraphicDevice.h>
+
+#include <V3d_Viewer.hxx>
+#include <V3d_View.hxx>
+#include <AIS_InteractiveContext.hxx>
+#include <NIS_InteractiveContext.hxx>
+#include <NIS_Surface.hxx>
+
+
+#define MyWindow  ((OSX_Window*)reserved1) 
+
+@interface OCNISView (PrivateMethods)
+    - (void)    needsUpdate:(NSNotification*)notification;
+@end
+
+@implementation OCNISView
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// 
+//--------------------------------------------------------------------------------------------------------------------------------
+- (id)    initWithFrame:    (NSRect)frameRect {
+    self = [super initWithFrame: frameRect];
+    
+    if (self != nil) {
+        const Handle_OSX_GraphicDevice& defaultDevice = [[OCGraphicDevice defaultDevice] graphicDevice];
+        reserved1 = new OSX_Window(defaultDevice , self , nil , nil);
+
+        MyWindow->SetBackground(Quantity_Color(1,1,1,Quantity_TOC_RGB));
+
+        TCollection_ExtendedString a3DName("Visu3D");
+        v3dViewer =  new V3d_Viewer(defaultDevice, a3DName.ToExtString());
+        v3dViewer->SetDefaultBackgroundColor(Quantity_NOC_BLACK);
+        nisView = new NIS_View(v3dViewer);
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(needsUpdate:) name:NSViewGlobalFrameDidChangeNotification object:self];
+        endInit = NO;
+    }
+    
+    return self;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// 
+//--------------------------------------------------------------------------------------------------------------------------------
+- (void) dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewGlobalFrameDidChangeNotification object:self];
+    nisView.Nullify();
+    v3dViewer.Nullify();
+    delete MyWindow;
+
+    [super dealloc];
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// 
+//--------------------------------------------------------------------------------------------------------------------------------
+- (const Handle_V3d_Viewer&)                v3dViewer {
+    return v3dViewer;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// 
+//--------------------------------------------------------------------------------------------------------------------------------
+- (const Handle_NIS_View&)                    nisView {
+    return nisView;
+}
+
+- (void)    lockFocus {
+    [super lockFocus];
+    if (!endInit) {
+        // deferred end initialization as the window must be drawable for a 
+        // GL context to be attached
+        nisView->SetWindow(MyWindow);
+        endInit = YES;
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// 
+//--------------------------------------------------------------------------------------------------------------------------------
+- (void) drawRect:(NSRect)rect  {
+    [super drawRect: rect];
+
+/*        NSGraphicsContext* ctx = [NSGraphicsContext currentContext];
+        CGContextRef gc = (CGContextRef)[ctx graphicsPort];
+        MyWindow->Draw(gc);
+ */
+}
+
+- (BOOL) isFlipped {
+    return YES;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// 
+//--------------------------------------------------------------------------------------------------------------------------------
+- (void)    needsUpdate:(NSNotification*)notification {
+    [self update];
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// 
+//--------------------------------------------------------------------------------------------------------------------------------
+- (void)    update {
+    if (!nisView.IsNull()) {
+        nisView->MustBeResized ();
+    }
+}
+
+@end
