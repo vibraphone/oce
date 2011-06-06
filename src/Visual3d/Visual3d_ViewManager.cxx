@@ -40,6 +40,9 @@
 /*
  * Includes
  */
+#if (defined(__MACH__) && defined(__APPLE__))
+#include <Carbon/Carbon.h>
+#endif
 
 // for the class
 #include <Visual3d_ViewManager.ixx>
@@ -56,11 +59,13 @@
 #include <Visual3d_PickPath.hxx>
 #include <Visual3d_SetIteratorOfSetOfView.hxx>
 
-#ifndef WNT
-# include <Xw_Window.hxx>
-#else
+#if (defined(__MACH__) && defined(__APPLE__))
+#include <OSX_Window.hxx>
+#elif defined(WNT)
 # include <WNT_Window.hxx>
-#endif  // WNT
+#else
+# include <Xw_Window.hxx>
+#endif
 
 //-Aliases
 
@@ -995,13 +1000,22 @@ Standard_Integer Width, Height;
 	// Parcours de la liste des vues pour rechercher
 	// une vue ayant pour fenetre celle specifiee
 	Visual3d_SetIteratorOfSetOfView MyIterator(MyDefinedView);
+#if (defined(__MACH__) && defined(__APPLE__))
+        long TheWindowIdOfView;
+#else
 	int TheWindowIdOfView;
+#endif
 
 #ifndef WNT
-const Handle(Xw_Window) THEWindow = *(Handle(Xw_Window) *) &AWindow;
-	int TheSpecifiedWindowId = int (THEWindow->XWindow ());
+#if (defined(__MACH__) && defined(__APPLE__))
+        const Handle(OSX_Window) THEWindow = *(Handle(OSX_Window) *) &AWindow;
+	long TheSpecifiedWindowId = long (THEWindow->OSXWindow());
 #else
-const Handle(WNT_Window) THEWindow = *(Handle(WNT_Window) *) &AWindow;
+        const Handle(Xw_Window) THEWindow = *(Handle(Xw_Window) *) &AWindow;
+	int TheSpecifiedWindowId = int (THEWindow->XWindow ());
+#endif
+#else
+        const Handle(WNT_Window) THEWindow = *(Handle(WNT_Window) *) &AWindow;
 	int TheSpecifiedWindowId = int (THEWindow->HWindow ());
 #endif  // WNT
 
@@ -1012,10 +1026,15 @@ const Handle(WNT_Window) THEWindow = *(Handle(WNT_Window) *) &AWindow;
 
 const Handle(Aspect_Window) AspectWindow = (MyIterator.Value ())->Window ();
 #ifndef WNT
-const Handle(Xw_Window) theWindow = *(Handle(Xw_Window) *) &AspectWindow;
-	TheWindowIdOfView = int (theWindow->XWindow ());
+#if (defined(__MACH__) && defined(__APPLE__))
+        const Handle(OSX_Window) theWindow = *(Handle(OSX_Window) *) &AspectWindow;
+        TheWindowIdOfView = long (theWindow->OSXWindow());
 #else
-const Handle(WNT_Window) theWindow = *(Handle(WNT_Window) *) &AspectWindow;
+        const Handle(Xw_Window) theWindow = *(Handle(Xw_Window) *) &AspectWindow;
+	TheWindowIdOfView = int (theWindow->XWindow ());
+#endif
+#else
+        const Handle(WNT_Window) theWindow = *(Handle(WNT_Window) *) &AspectWindow;
 	TheWindowIdOfView = int (theWindow->HWindow ());
 #endif  // WNT
 		// Comparaison sur les windows ids
@@ -1059,11 +1078,11 @@ const Handle(WNT_Window) theWindow = *(Handle(WNT_Window) *) &AspectWindow;
 		apick.Pick.depth	= 0;
 
 	// Picking : le retour
-Standard_Integer i, j=0;
-Standard_Integer NbPick;
+        Standard_Integer i, j=0;
+        Standard_Integer NbPick;
 
-Visual3d_PickDescriptor PDes (CTX);
-Visual3d_PickPath PPat;
+        Visual3d_PickDescriptor PDes (CTX);
+        Visual3d_PickPath PPat;
 
 	PDes.Clear ();
 	NbPick	= 0;
@@ -1089,17 +1108,17 @@ Visual3d_PickPath PPat;
 
 	// Pas tres efficace, a revoir (CAL 22/09/95)
 	if (apick.Pick.depth > 2) {
-Handle(Graphic3d_Structure) StructCur =
-	Graphic3d_StructureManager::Identification (j);
-Standard_Boolean found;
-Graphic3d_MapOfStructure Set;
+            Handle(Graphic3d_Structure) StructCur =
+	    Graphic3d_StructureManager::Identification (j);
+            Standard_Boolean found;
+            Graphic3d_MapOfStructure Set;
 
 	    for (i=2; i<apick.Pick.depth; i++) {
 		found = Standard_False;
 		j = apick.Pick.listid[i-1];
 		Set.Clear ();
 		StructCur->Descendants (Set);
-Graphic3d_MapIteratorOfMapOfStructure IteratorD (Set);
+                Graphic3d_MapIteratorOfMapOfStructure IteratorD (Set);
 
 		j = apick.Pick.listid[i];
 		while (IteratorD.More () && !found) {
@@ -1138,13 +1157,22 @@ Standard_Boolean Exist = Standard_False;
 	// Parcours de la liste des vues pour rechercher
 	// une vue ayant pour fenetre celle specifiee
 	Visual3d_SetIteratorOfSetOfView MyIterator(MyDefinedView);
+#if (defined(__MACH__) && defined(__APPLE__))
+	long TheWindowIdOfView;
+#else
 	int TheWindowIdOfView;
+#endif
 
 #ifndef WNT
-const Handle(Xw_Window) THEWindow = *(Handle(Xw_Window) *) &AWindow;
-	int TheSpecifiedWindowId = int (THEWindow->XWindow ());
+#if (defined(__MACH__) && defined(__APPLE__))
+        const Handle(OSX_Window) THEWindow = *(Handle(OSX_Window) *) &AWindow;
+        long TheSpecifiedWindowId = long (THEWindow->OSXWindow());
 #else
-const Handle(WNT_Window) THEWindow = *(Handle(WNT_Window) *) &AWindow;
+        const Handle(Xw_Window) THEWindow = *(Handle(Xw_Window) *) &AWindow;
+	int TheSpecifiedWindowId = int (THEWindow->XWindow ());
+#endif
+#else
+        const Handle(WNT_Window) THEWindow = *(Handle(WNT_Window) *) &AWindow;
 	int TheSpecifiedWindowId = int (THEWindow->HWindow ());
 #endif  // WNT
 
@@ -1155,10 +1183,15 @@ const Handle(WNT_Window) THEWindow = *(Handle(WNT_Window) *) &AWindow;
 
 const Handle(Aspect_Window) AspectWindow = (MyIterator.Value ())->Window ();
 #ifndef WNT
-const Handle(Xw_Window) theWindow = *(Handle(Xw_Window) *) &AspectWindow;
-	TheWindowIdOfView = int (theWindow->XWindow ());
+#if (defined(__MACH__) && defined(__APPLE__))
+        const Handle(OSX_Window) theWindow = *(Handle(OSX_Window) *) &AspectWindow;
+        TheWindowIdOfView = long (theWindow->OSXWindow());
 #else
-const Handle(WNT_Window) theWindow = *(Handle(WNT_Window) *) &AspectWindow;
+        const Handle(Xw_Window) theWindow = *(Handle(Xw_Window) *) &AspectWindow;
+	TheWindowIdOfView = int (theWindow->XWindow ());
+#endif
+#else
+        const Handle(WNT_Window) theWindow = *(Handle(WNT_Window) *) &AspectWindow;
 	TheWindowIdOfView = int (theWindow->HWindow ());
 #endif  // WNT
 		// Comparaison sur les windows ids

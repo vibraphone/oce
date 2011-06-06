@@ -165,7 +165,11 @@ To solve the problem (for lack of a better solution) I make 2 passes.
 #ifdef WNT
 # include <WNT_WDriver.hxx>
 #else
-# include <Xw_Driver.hxx>
+#if (defined(__MACH__) && defined(__APPLE_))
+#include <OSX_Driver.hxx>
+#else
+#include <Xw_Driver.hxx>
+#endif
 #endif
 
 #ifdef G003
@@ -3333,6 +3337,7 @@ void V3d_View::ScreenCopy (const Handle(PlotMgt_PlotterDriver)& aPlotterDriver,
                            const Standard_Boolean fWhiteBackground,
                            const Quantity_Factor aPlotScale)
 {
+#if !(defined(__MACH__) && defined(__APPLE__))
   TCollection_AsciiString aFileToDump;
   Handle(Aspect_WindowDriver) aWindowDriver =
 #ifdef WNT
@@ -3413,6 +3418,7 @@ void V3d_View::ScreenCopy (const Handle(PlotMgt_PlotterDriver)& aPlotterDriver,
       aFileToDump.ToCString(), (float)(thePWidth / 2.), (float)(thePHeight / 2.), aScale);
     aPlotterDriver -> EndDraw ();
   }
+#endif
 }
 #undef SCREENCOPY_FILENAME
 

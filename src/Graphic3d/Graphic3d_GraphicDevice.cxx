@@ -19,7 +19,7 @@
 
 #define XDESTROY
 
-#ifndef WNT
+#if !defined(WNT) && !(defined(__MACH__) && defined(__APPLE__))
 
 #include <stdio.h>
 #include <sys/utsname.h>

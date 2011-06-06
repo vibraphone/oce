@@ -18,6 +18,14 @@ IF (WIN32)
 		WNT
 	)
 ELSE(WIN32)
+    IF (APPLE)
+        MESSAGE(STATUS "NOTHING DONE - TO BE UPDATED")
+        SET(TOOLKIT_MODULES ${TOOLKIT_MODULES}
+                OSX
+        )
+#        SET(TOOLKIT_LIBS "-framework Cocoa -framework OpenGL -framework IOKit")
+        SET(TOOLKIT_LIBS "-framework Cocoa -framework OpenGL -framework QuartzCore")
+    ELSE(APPLE)
 	IF(${PROJECT_NAME}_VISUALISATION_FULL)
 		SET(TOOLKIT_MODULES ${TOOLKIT_MODULES}
 			ImageUtility
@@ -25,6 +33,7 @@ ELSE(WIN32)
 		)
 	ENDIF(${PROJECT_NAME}_VISUALISATION_FULL)
 	SET(TOOLKIT_LIBS ${X11_Xmu_LIB} ${X11_LIBRARIES})
+    ENDIF(APPLE)
 ENDIF(WIN32)
 SET(TOOLKIT_DEPENDS TKMath TKernel)
 

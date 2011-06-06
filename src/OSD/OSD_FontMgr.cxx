@@ -11,7 +11,7 @@
 # include <stdlib.h>
 #else  //WNT
 # include <dirent.h>
-# include <X11/Xlib.h>
+//# include <X11/Xlib.h>
 #endif //WNT
 
 #include <NCollection_List.hxx>
@@ -234,6 +234,7 @@ void OSD_FontMgr::InitFontDataBase() {
 #endif //WNT
 
 #ifndef WNT
+#if !(defined(__MACH__) && defined(__APPLE__))
   StringList dirs;
   Handle(TCollection_HAsciiString) str = new TCollection_HAsciiString;
   Display * disp = XOpenDisplay(NULL);
@@ -416,6 +417,7 @@ void OSD_FontMgr::InitFontDataBase() {
       fileFontsDir.Clear(); 
     }
   }
+#endif
 #endif
 }
 

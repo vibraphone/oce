@@ -78,6 +78,8 @@ Old code resulted in crashes on some ATI Radeon cards under Linux.
 /*
 * Includes
 */
+#if !(defined(__MACH__) && defined(__APPLE__))
+
 #include <OpenGl_tgl_all.hxx>
 #include <OpenGl_telem_util.hxx>
 #include <stdio.h>
@@ -1053,3 +1055,4 @@ __declspec( dllexport ) int __fastcall __OpenGl_INIT__ (
 
 #endif  /* WNT */
   /*----------------------------------------------------------------------*/
+#endif

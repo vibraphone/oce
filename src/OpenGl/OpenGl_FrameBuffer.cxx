@@ -5,7 +5,11 @@
 #endif
 
 #ifndef WNT
+#if (defined(__MACH__) && defined(__APPLE))
+  #define glGetProcAddress( x )  wglGetProcAddress( x )
+#else
   #define glGetProcAddress( x )  glXGetProcAddress( (const GLubyte*) x )
+#endif
 #else
   #define glGetProcAddress( x )  wglGetProcAddress( x )
 #endif

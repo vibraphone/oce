@@ -4,6 +4,9 @@
   Created:    30-03-98  ZOV (ZELENKOV Oleg)
 
 ************************************************************************/
+#if (defined(__MACH__) && defined(__APPLE__))
+#include <Carbon/Carbon.h>
+#endif
 
 #include <V3d.hxx>
 #include <V3d_PositionLight.ixx>
@@ -32,7 +35,11 @@
 #ifdef WNT
 # include <WNT_Window.hxx>
 #else
+#if (defined(__MACH__) && defined(__APPLE__))
+#include <OSX_Window.hxx>
+#else
 # include <Xw_Window.hxx>
+#endif
 #endif
 
 V3d_PositionLight::V3d_PositionLight(const Handle(V3d_Viewer)& VM) : V3d_Light(VM) {
@@ -278,7 +285,11 @@ const {
 #ifdef WNT
   Handle( WNT_Window ) WW = Handle( WNT_Window ) :: DownCast (  aView -> Window ()  );
 #else
+#if (defined(__MACH__) && defined(__APPLE__))
+  Handle( OSX_Window  ) WW = Handle( OSX_Window  ) :: DownCast (  aView -> Window ()  );
+#else
   Handle( Xw_Window  ) WW = Handle( Xw_Window  ) :: DownCast (  aView -> Window ()  );
+#endif
 #endif
   Visual3d_ContextPick CTXP;
   Visual3d_PickDescriptor Pdes = VM->Pick(CTXP,WW,Xpix,Ypix);

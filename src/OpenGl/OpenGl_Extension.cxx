@@ -95,69 +95,59 @@ extern GLboolean CheckExtension(char *extName, const char *extString)
   return GL_FALSE;
 }
 
-extern GLboolean InitExtensionGLX(Display *display)
-{
-#ifndef WNT 
-
-  int dontcare; /* for returned arguments we don't care about */
-
-  if (display == NULL) return GL_FALSE;
-
-  if (!flag_InitExtensionGLX)
-  {       
-    /* does the server know about OpenGL & GLX? */
-    if(!XQueryExtension(display, "GLX", &dontcare, &dontcare, &dontcare)) {
-#ifdef DEBUG
-      fprintf(stderr,"This system doesn't appear to support OpenGL\n");
-#endif /* DEBUG */
-      return GL_FALSE;
-    }  
-
-    /* find the glx version */
-    if(glXQueryVersion(display, &GLXmajor, &GLXminor)) {
-#ifdef DEBUG
-      printf("GLX Version: %d.%d\n", GLXmajor, GLXminor);
-#endif /* DEBUG */
-    } else {
-#ifdef DEBUG
-      fprintf(stderr, "Error: glXQueryVersion() failed.\n");
-#endif /* DEBUG */
-      return GL_FALSE;
-    }
-
-    /* get screen number */
-    screen_num = DefaultScreen(display);
-
-    flag_InitExtensionGLX = GL_TRUE;
-    mytheDisplay = display;
-
-  } /* (!flag_InitExtensionGLX) */
-
-  return GL_TRUE;
-
+extern GLboolean InitExtensionGLX(Display *display) {
+#if defined (WNT) || (defined(__MACH__) && defined(__APPLE__))
+    return GL_FALSE;
 #else
+    int dontcare; /* for returned arguments we don't care about */
 
-  return GL_FALSE;
+    if (display == NULL) return GL_FALSE;
+
+    if (!flag_InitExtensionGLX) {       
+        /* does the server know about OpenGL & GLX? */
+        if(!XQueryExtension(display, "GLX", &dontcare, &dontcare, &dontcare)) {
+#ifdef DEBUG
+            fprintf(stderr,"This system doesn't appear to support OpenGL\n");
+#endif /* DEBUG */
+            return GL_FALSE;
+        }  
+
+        /* find the glx version */
+        if(glXQueryVersion(display, &GLXmajor, &GLXminor)) {
+#ifdef DEBUG
+            printf("GLX Version: %d.%d\n", GLXmajor, GLXminor);
+#endif /* DEBUG */
+        } else {
+#ifdef DEBUG
+            fprintf(stderr, "Error: glXQueryVersion() failed.\n");
+#endif /* DEBUG */
+            return GL_FALSE;
+        }
+
+        /* get screen number */
+        screen_num = DefaultScreen(display);
+
+        flag_InitExtensionGLX = GL_TRUE;
+        mytheDisplay = display;
+
+    } /* (!flag_InitExtensionGLX) */
+
+    return GL_TRUE;
 
 #endif /* WNT */
 }
 
 /*----------------------------------------------------------------------*/
-extern GLboolean QueryExtensionGLX(char *extName)
-{
+extern GLboolean QueryExtensionGLX(char *extName) {
   GLboolean result = GL_FALSE;
 
 #ifdef GLX_VERSION_1_1
-  if (flag_InitExtensionGLX)
-  {
-    if ( GLXminor > 1 || GLXmajor > 1 ) /* GLX_VERSION_1_2 */
-    {
+  if (flag_InitExtensionGLX) {
+    if ( GLXminor > 1 || GLXmajor > 1 ) /* GLX_VERSION_1_2 */ {
       /* Certaines extensions sont par defaut dans la version 1.2 */
       if (strcmp(extName,"GLX_EXT_import_context")) return GL_TRUE;
       result = CheckExtension(extName, glXQueryExtensionsString(mytheDisplay, screen_num));
-    }
-    else if( GLXminor > 0 || GLXmajor > 1 ) /* GLX_VERSION_1_1 */
-    {
+    } else if( GLXminor > 0 || GLXmajor > 1 ) /* GLX_VERSION_1_1 */ {
       result = CheckExtension(extName, glXQueryExtensionsString(mytheDisplay, screen_num));
     }
   }
@@ -187,12 +177,12 @@ extern GLboolean QueryExtension(char *extName)
     /* Certaines extensions sont par defaut dans la version 1.1 */
     /* Certain extensions are the defaut in version 1.1 */
     if ((strcmp(extName,"GL_EXT_vertex_array")) ||  
-      (strcmp(extName,"GL_EXT_polygon_offset")) ||  
-      (strcmp(extName,"GL_EXT_blend_logic_op")) ||  
-      (strcmp(extName,"GL_EXT_texture"))    ||
-      (strcmp(extName,"GL_EXT_copy_texture")) ||
-      (strcmp(extName,"GL_EXT_subtexture")) ||  
-      (strcmp(extName,"GL_EXT_texture_object"))) 
+        (strcmp(extName,"GL_EXT_polygon_offset")) ||  
+        (strcmp(extName,"GL_EXT_blend_logic_op")) ||  
+        (strcmp(extName,"GL_EXT_texture"))    ||
+        (strcmp(extName,"GL_EXT_copy_texture")) ||
+        (strcmp(extName,"GL_EXT_subtexture")) ||  
+        (strcmp(extName,"GL_EXT_texture_object"))) 
       result =  GL_TRUE;  
     else  
       result = CheckExtension(extName, (char *)glGetString(GL_EXTENSIONS)); 

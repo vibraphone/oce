@@ -109,6 +109,9 @@
 #ifdef WNT
 #include <windows.h>
 #endif
+#if (defined(__MACH__) && defined(__APPLE__))
+#include <Carbon/Carbon.h>
+#endif
 
 // for the class
 #include <Visual3d_View.ixx>
@@ -149,11 +152,13 @@
 
 #include <TColStd_HArray2OfReal.hxx>
 
-#ifndef WNT
-# include <Xw_Window.hxx>
-#else
+#if (defined(__MACH__) && defined(__APPLE__))
+#include <OSX_Window.hxx>
+#elif defined(WNT)
 # include <WNT_Window.hxx>
-#endif  // WNT
+#else
+# include <Xw_Window.hxx>
+#endif
 
 #include <float.h>
 
@@ -372,7 +377,7 @@ Standard_Real Sx, Sy, Sz;
         }
         //
 
-Standard_Real um, vm, uM, vM;
+        Standard_Real um, vm, uM, vM;
 
         MyCView.Mapping.Projection      = int (MyViewMapping.Projection ());
         (MyViewMapping.ProjectionReferencePoint ()).Coord (X, Y, Z);
@@ -463,18 +468,24 @@ void Visual3d_View::SetWindow (const Handle(Aspect_Window)& AWindow) {
         if (IsDefined ())
                 Visual3d_ViewDefinitionError::Raise ("Window already defined");
 
-        MyWindow        = AWindow;
-        MyCView.WsId                    = MyCView.ViewId;
-        MyCView.DefWindow.IsDefined     = 1;
+        MyWindow                     = AWindow;
+        MyCView.WsId                 = MyCView.ViewId;
+        MyCView.DefWindow.IsDefined  = 1;
 #ifndef WNT
-const Handle(Xw_Window) theWindow = *(Handle(Xw_Window) *) &AWindow;
-        MyCView.DefWindow.XWindow       = theWindow->XWindow ();
+#if (defined(__MACH__) && defined(__APPLE__))
+        const Handle(OSX_Window) theWindow = *(Handle(OSX_Window) *) &AWindow;
+        MyCView.DefWindow.XWindow          = (unsigned long)(theWindow->OSXWindow());
+        MyCView.GContext                   = theWindow->GLContext();
+#else
+        const Handle(Xw_Window) theWindow = *(Handle(Xw_Window) *) &AWindow;
+        MyCView.DefWindow.XWindow         = theWindow->XWindow ();
 #ifdef RIC120302
-        MyCView.DefWindow.XParentWindow = theWindow->XParentWindow ();
+        MyCView.DefWindow.XParentWindow   = theWindow->XParentWindow ();
+#endif
 #endif
 #else
-WNT_WindowData* wd;
-const Handle(WNT_Window) theWindow = *(Handle(WNT_Window) *) &AWindow;
+        WNT_WindowData* wd;
+        const Handle(WNT_Window) theWindow = *(Handle(WNT_Window) *) &AWindow;
         MyCView.DefWindow.XWindow       = ( HWND )(theWindow->HWindow());
 #ifdef RIC120302
         MyCView.DefWindow.XParentWindow = ( HWND )(theWindow->HParentWindow());

@@ -6,11 +6,21 @@ IF(DEFINED TOOLKIT_INCLUDE_DIRECTORIES)
 ENDIF(DEFINED TOOLKIT_INCLUDE_DIRECTORIES)
 FOREACH(MODULE ${TOOLKIT_MODULES})
 	# add all .cxx/*.c files or each module
-	FILE(GLOB source_files
-		${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.cxx
-		${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.c
-		${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.cxx
-		${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.c)
+        if (APPLE)
+	    FILE(GLOB source_files
+		    ${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.m
+		    ${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.mm
+		    ${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.cxx
+		    ${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.c
+		    ${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.cxx
+		    ${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.c)
+        ELSE(APPLE)
+	    FILE(GLOB source_files
+		    ${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.cxx
+		    ${${PROJECT_NAME}_SOURCE_DIR}/src/${MODULE}/*.c
+		    ${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.cxx
+		    ${${PROJECT_NAME}_SOURCE_DIR}/drv/${MODULE}/*.c)
+        ENDIF(APPLE)
 	#MESSAGE(STATUS "${source_files}")
 
 	IF (WIN32)
