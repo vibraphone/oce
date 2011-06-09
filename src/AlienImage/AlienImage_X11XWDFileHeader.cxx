@@ -1,5 +1,5 @@
 #ifndef WNT
-# include <X11/Xlib.h>
+# include <X11/X.h>
 #endif  // WNT
 #include <AlienImage_X11XWDFileHeader.hxx>
 

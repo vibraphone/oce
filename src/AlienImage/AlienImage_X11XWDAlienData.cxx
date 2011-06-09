@@ -12,7 +12,7 @@
 //		Check file extension, must be ".xwd".
 
 #ifndef WNT
-# include <X11/Xlib.h>
+# include <X11/X.h>
 #endif  // WNT
 #include <Aspect_GenericColorMap.hxx>
 #include <Image_PseudoColorImage.hxx>
