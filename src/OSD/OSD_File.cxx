@@ -246,22 +246,30 @@ OSD_File OSD_File::BuildTemporary(){
  int dummy;
 
  fic = tmpfile();
- dummy = open("dummy", O_RDWR | O_CREAT);  // Open a summy file
+ dummy = open("dummy", O_RDWR | O_CREAT);  // Open a dummy file
  result.myFileChannel = dummy - 1;         // This is file channel of "fic" +1
  close(dummy);                             // Close dummy file
  unlink("dummy");                          // Removes dummy file
 
 #else 
  OSD_File result;
- char *name = tmpnam((char*) 0) ;
+ char tn[] = "/tmp/oce_buildtemporary_XXXXXX";
+ int tn_fd = -1;
+ char buf[1024];
+ char fd_path[1024];
+ ssize_t len;
 
+ tn_fd = mkstemp(tn);
+ result.myFILE = fdopen( tn_fd, "w+" );
 
- TCollection_AsciiString aName ( name ) ;
+ sprintf(fd_path, "/proc/self/fd/%d", tn_fd);
+ len = readlink(fd_path, buf, sizeof(buf)-1);
+ buf[len] = '\0';
+
+ TCollection_AsciiString aName ( buf ) ;
  OSD_Path aPath( aName ) ;
 
  result.SetPath( aPath ) ;
-
- result.myFILE  = fopen( name, "w+" ) ;
 
  result.myFileChannel = fileno( (FILE*)result.myFILE );
 

@@ -68,11 +68,12 @@ TCollection_AsciiString aBuffer;
 }
 
 OSD_Directory OSD_Directory::BuildTemporary(){
-OSD_Protection          Protect;
-OSD_Directory           aDirectoryToReturn;
-Standard_Integer        internal_prot;
-Standard_CString        name = tmpnam(NULL);
-TCollection_AsciiString aString (name);
+ OSD_Protection          Protect;
+ OSD_Directory           aDirectoryToReturn;
+ Standard_Integer        internal_prot;
+ char dt[] = "oce_temporary_dir_XXXXXX";
+ Standard_CString        name = mkdtemp(dt);
+ TCollection_AsciiString aString (name);
 
  internal_prot = Protect.Internal();
 
