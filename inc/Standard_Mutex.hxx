@@ -151,7 +151,7 @@ public:
 
   private:
     Standard_Mutex &myMutex;
-    Standard_Boolean nbLocked; //!< Note that we do not protect this field from 
+    Standard_Integer nbLocked; //!< Note that we do not protect this field from 
                                //!< concurrent access, as it should always be accessed
                                //!< from within one thread, i.e. synchronously
   };
