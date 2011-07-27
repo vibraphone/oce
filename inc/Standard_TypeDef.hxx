@@ -6,8 +6,8 @@
 
 #include <stddef.h>
 
-#define Standard_False (Standard_Boolean)0
-#define Standard_True  (Standard_Boolean)1
+#define Standard_False false
+#define Standard_True  true
 
 #ifndef _Standard_Macro_HeaderFile
 #include <Standard_Macro.hxx>
@@ -15,7 +15,7 @@
 
 typedef int Standard_Integer;
 typedef double Standard_Real;
-typedef unsigned int Standard_Boolean;
+typedef bool Standard_Boolean;
 typedef float Standard_ShortReal;
 typedef char  Standard_Character;
 typedef short Standard_ExtCharacter;
