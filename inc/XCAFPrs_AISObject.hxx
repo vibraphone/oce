@@ -6,6 +6,8 @@
 #ifndef _XCAFPrs_AISObject_HeaderFile
 #define _XCAFPrs_AISObject_HeaderFile
 
+#ifdef OCE_VISUALISATION
+
 #ifndef _Standard_HeaderFile
 #include <Standard.hxx>
 #endif
@@ -19,6 +21,7 @@
 #ifndef _TDF_Label_HeaderFile
 #include <TDF_Label.hxx>
 #endif
+
 #ifndef _AIS_Shape_HeaderFile
 #include <AIS_Shape.hxx>
 #endif
@@ -28,6 +31,7 @@
 #ifndef _Handle_Prs3d_Presentation_HeaderFile
 #include <Handle_Prs3d_Presentation.hxx>
 #endif
+
 #ifndef _Standard_Integer_HeaderFile
 #include <Standard_Integer.hxx>
 #endif
@@ -71,7 +75,7 @@ TDF_Label myLabel;
 
 
 
-
+#endif
 
 // other Inline functions and methods (like "C++: function call" methods)
 

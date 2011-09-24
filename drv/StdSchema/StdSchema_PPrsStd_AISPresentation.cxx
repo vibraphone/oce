@@ -1,3 +1,6 @@
+#include <Standard_Macro.hxx>
+#ifdef OCE_VISUALISATION
+
 #ifndef _StdSchema_PPrsStd_AISPresentation_HeaderFile
 #include <StdSchema_PPrsStd_AISPresentation.hxx>
 #endif
@@ -11,6 +14,8 @@
 #ifndef _Storage_stCONSTclCOM_HeaderFile
 #include <Storage_stCONSTclCOM.hxx>
 #endif
+
+
 
 IMPLEMENT_STANDARD_HANDLE(StdSchema_PPrsStd_AISPresentation,Storage_CallBack)
 IMPLEMENT_STANDARD_RTTIEXT(StdSchema_PPrsStd_AISPresentation,Storage_CallBack)
@@ -101,3 +106,5 @@ void StdSchema_PPrsStd_AISPresentation::Read(const Handle(Standard_Persistent)& 
 { 
   StdSchema_PPrsStd_AISPresentation::SRead(p,f,theSchema);
 }
+
+#endif

@@ -23,6 +23,7 @@
 #include <StdSchema_PDF_Attribute.hxx>
 #endif
 
+#ifdef OCE_VISUALISATION
 
 DEFINE_STANDARD_HANDLE(StdSchema_PPrsStd_AISPresentation_1,Storage_CallBack)
 
@@ -40,4 +41,5 @@ public:
 
   DEFINE_STANDARD_RTTI(StdSchema_PPrsStd_AISPresentation_1)
 };
+#endif
 #endif

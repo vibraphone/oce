@@ -37,7 +37,9 @@ Handle(MDF_ARDriverTable) StdDrivers_DocumentRetrievalDriver::AttributeDrivers(c
   MDocStd::AddRetrievalDrivers(HARSeq, theMsgDriver);
   MFunction::AddRetrievalDrivers(HARSeq, theMsgDriver);
   MNaming::AddRetrievalDrivers(HARSeq, theMsgDriver); 
+#ifdef OCE_VISUALISATION
   MPrsStd::AddRetrievalDrivers(HARSeq, theMsgDriver); 
+#endif
  
   //
   aRetrievalTable->SetDrivers(HARSeq);

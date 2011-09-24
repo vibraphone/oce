@@ -3,6 +3,8 @@
 // The copyright and license terms as defined for the original file apply to 
 // this header file considered to be the "object code" form of the original source.
 
+#ifdef OCE_VISUALISATION
+
 #include <XCAFPrs_AISObject.jxx>
 
 #ifndef _Standard_Type_HeaderFile
@@ -30,4 +32,4 @@ IMPLEMENT_DOWNCAST(XCAFPrs_AISObject,Standard_Transient)
 IMPLEMENT_STANDARD_RTTI(XCAFPrs_AISObject)
 
 
-
+#endif

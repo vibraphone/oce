@@ -4,7 +4,9 @@
 //              <det@strelox.nnov.matra-dtv.fr>
 
 #include <XCAFApp_Application.ixx>
+#ifdef OCE_VISUALISATION
 #include <TPrsStd_DriverTable.hxx>
+#endif
 #include <XCAFPrs_Driver.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
 #include <TDF_Label.hxx>
@@ -29,8 +31,10 @@ Handle(XCAFApp_Application) XCAFApp_Application::GetApplication()
 XCAFApp_Application::XCAFApp_Application()
 {
   // register driver for presentation
+#ifdef OCE_VISUALISATION
   Handle(TPrsStd_DriverTable) table  = TPrsStd_DriverTable::Get();
   table->AddDriver (XCAFPrs_Driver::GetID(), new XCAFPrs_Driver);
+#endif
 }
 
 //=======================================================================

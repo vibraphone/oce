@@ -73,7 +73,9 @@ Handle(XmlMDF_ADriverTable) XmlDrivers::AttributeDrivers
   XmlMNaming    ::AddDrivers (aTable, theMessageDriver);
   XmlMFunction  ::AddDrivers (aTable, theMessageDriver); 
   XmlMDocStd    ::AddDrivers (aTable, theMessageDriver); 
+#ifdef OCE_VISUALISATION
   XmlMPrsStd    ::AddDrivers (aTable, theMessageDriver); 
+#endif
   //
   return aTable;
 }

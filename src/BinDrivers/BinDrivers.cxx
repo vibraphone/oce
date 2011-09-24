@@ -67,7 +67,9 @@ Handle(BinMDF_ADriverTable) BinDrivers::AttributeDrivers
   BinMNaming    ::AddDrivers (aTable, aMsgDrv);
   BinMDocStd    ::AddDrivers (aTable, aMsgDrv);
   BinMFunction  ::AddDrivers (aTable, aMsgDrv);
+#ifdef OCE_VISUALISATION
   BinMPrsStd    ::AddDrivers (aTable, aMsgDrv);
+#endif
   return aTable;
 }
 

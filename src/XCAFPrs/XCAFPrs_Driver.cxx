@@ -3,6 +3,8 @@
 // Author:	data exchange team
 //		<det@doomox>
 
+#ifdef OCE_VISUALISATION
+
 #include <XCAFPrs_Driver.ixx>
 #include <XCAFPrs_AISObject.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
@@ -42,3 +44,5 @@ const Standard_GUID& XCAFPrs_Driver::GetID()
   static Standard_GUID ID("5b896afc-3adf-11d4-b9b7-0060b0ee281b");
   return ID;
 }
+
+#endif

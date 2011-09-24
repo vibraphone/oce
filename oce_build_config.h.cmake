@@ -259,3 +259,6 @@
 /* Location where TKOpenGl shared library will be installed. */
 #cmakedefine OCE_DEFAULT_CSF_GraphicShr "@OCE_DEFAULT_CSF_GraphicShr@"
 
+/* Build OCE Visualisation packages? */
+#cmakedefine OCE_VISUALISATION
+

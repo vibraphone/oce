@@ -4,6 +4,7 @@
 //		<abv@doomox.nnov.matra-dtv.fr>
 
 #include <XCAFPrs_AISObject.ixx>
+#ifdef OCE_VISUALISATION
 #include <TCollection_ExtendedString.hxx>
 #include <gp_Pnt.hxx>
 #include <Prs3d_Text.hxx>
@@ -433,3 +434,5 @@ void XCAFPrs_AISObject::Compute (const Handle(PrsMgr_PresentationManager3d)& aPr
   
   aPrs->ReCompute(); // for hidden line recomputation if necessary...
 }
+
+#endif

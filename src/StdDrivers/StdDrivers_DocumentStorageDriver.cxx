@@ -48,7 +48,9 @@ Handle(MDF_ASDriverTable) StdDrivers_DocumentStorageDriver::AttributeDrivers(con
   MDocStd::AddStorageDrivers(HASSeq, theMsgDriver); 
   MFunction::AddStorageDrivers(HASSeq, theMsgDriver);
   MNaming::AddStorageDrivers(HASSeq, theMsgDriver);
+#ifdef OCE_VISUALISATION
   MPrsStd::AddStorageDrivers(HASSeq, theMsgDriver);
+#endif
   //
   aStorageTable->SetDrivers(HASSeq);
   return aStorageTable;

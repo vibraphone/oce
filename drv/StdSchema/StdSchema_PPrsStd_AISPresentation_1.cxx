@@ -1,3 +1,6 @@
+#include <Standard_Macro.hxx>
+#ifdef OCE_VISUALISATION
+
 #ifndef _StdSchema_PPrsStd_AISPresentation_1_HeaderFile
 #include <StdSchema_PPrsStd_AISPresentation_1.hxx>
 #endif
@@ -106,3 +109,5 @@ void StdSchema_PPrsStd_AISPresentation_1::Read(const Handle(Standard_Persistent)
 { 
   StdSchema_PPrsStd_AISPresentation_1::SRead(p,f,theSchema);
 }
+
+#endif

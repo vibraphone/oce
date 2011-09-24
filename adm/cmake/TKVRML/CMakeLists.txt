@@ -18,9 +18,11 @@ SET(TOOLKIT_DEPENDS
 	TKGeomBase
 	TKPrim
 	TKGeomAlgo
-	TKService
+	TKServiceOS
+	TKV2d
 	TKV3d
 )
+
 
 INCLUDE(../BuildToolkit.cmake)
 
