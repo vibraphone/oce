@@ -254,7 +254,12 @@
 #cmakedefine _POSIX_SOURCE
 
 /* Location where resource files will be installed. */
+#ifndef _MSC_VER
 #cmakedefine OCE_INSTALL_DATA_DIR "@OCE_ABSPATH_DATA_DIR@"
+#else
+#cmakedefine OCE_INSTALL_DATA_DIR "@OCE_INSTALL_DATA_DIR@"
+#endif
+
 
 /* Debug postfix for DLLs */
 #if defined(_MSC_VER) && defined(_DEBUG)
@@ -269,4 +274,11 @@
 #else
 #cmakedefine OCE_DEFAULT_CSF_GraphicShr "@OCE_DEFAULT_CSF_GraphicShr@"
 #endif
+
+#ifdef _MSC_VER
+ /* No explicit fallback for MSVC */
+#else
+#cmakedefine OCE_CASROOT_FALLBACK_DIR "@OCE_INSTALL_DATA_DIR@"
+#endif
+
 
