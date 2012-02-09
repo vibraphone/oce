@@ -93,6 +93,11 @@ ENDIF(${PROJECT_NAME}_COMPILER_SUPPORTS_PCH AND ${PROJECT_NAME}_USE_PCH)
 
 ADD_LIBRARY(${TOOLKIT} ${${PROJECT_NAME}_LIBRARY_TYPE} ${TOOLKIT_SOURCE_FILES} ${TOOLKIT_RESOURCES} )
 
+# Avoid indirect dependencies when using shared libraries
+IF(${PROJECT_NAME}_BUILD_SHARED_LIB)
+	SET_TARGET_PROPERTIES(${TOOLKIT} PROPERTIES LINK_INTERFACE_LIBRARIES "")
+ENDIF(${PROJECT_NAME}_BUILD_SHARED_LIB)
+
 # TODO Add current toolkit header files into a source group?
 # Add target specific locations of *.lxx and *.ixx files
 IF(NOT ${PROJECT_NAME}_NO_LIBRARY_VERSION)
