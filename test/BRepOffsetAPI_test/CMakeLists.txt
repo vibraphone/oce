@@ -1,3 +1,3 @@
 IF (${PROJECT_NAME}_MODEL)
-    ADD_OCE_TEST(BRepOffsetAPI_test "TKOffset")
+    ADD_OCE_TEST(BRepOffsetAPI_test "TKOffset;TKBool;TKPrim;TKTopAlgo;TKBRep;TKMath;TKernel")
 ENDIF (${PROJECT_NAME}_MODEL)

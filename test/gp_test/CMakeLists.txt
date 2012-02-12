@@ -1,3 +1,3 @@
 IF (${PROJECT_NAME}_MODEL)
-    ADD_OCE_TEST(gp_test "TKG2d")
+    ADD_OCE_TEST(gp_test "TKG2d;TKMath")
 ENDIF (${PROJECT_NAME}_MODEL)

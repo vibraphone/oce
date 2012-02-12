@@ -1,1 +1,1 @@
-ADD_OCE_TEST(TCollection_test "TKMath")
+ADD_OCE_TEST(TCollection_test "TKMath;TKernel")

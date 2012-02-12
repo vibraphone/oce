@@ -1,3 +1,3 @@
 IF (${PROJECT_NAME}_MODEL)
-    ADD_OCE_TEST(BRepGProp_test "TKG2d;TKPrim;TKTopAlgo")
+    ADD_OCE_TEST(BRepGProp_test "TKG2d;TKPrim;TKTopAlgo;TKBRep;TKMath;TKernel")
 ENDIF (${PROJECT_NAME}_MODEL)

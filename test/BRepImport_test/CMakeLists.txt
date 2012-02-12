@@ -7,5 +7,5 @@ IF (${PROJECT_NAME}_DATAEXCHANGE)
     CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/BRepImport_test_config.h.cmake ${CMAKE_BINARY_DIR}/test_inc/BRepImport_test_config.h )
     INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/test_inc)
 
-    ADD_OCE_TEST(BRepImport_test "TKernel;TKSTEP")
+    ADD_OCE_TEST(BRepImport_test "TKSTEP;TKBRep;TKMath;TKernel")
 ENDIF (${PROJECT_NAME}_DATAEXCHANGE)
