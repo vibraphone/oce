@@ -7,14 +7,7 @@ FUNCTION(ENABLE_PRECOMPILED_HEADERS PHASE TARGET_NAME PRECOMPILED_HEADER SOURCE_
 
 		# Generate precompiled header translation unit
 		get_filename_component(pch_basename ${PRECOMPILED_HEADER} NAME_WE)
-		set(pch_unity ${CMAKE_CURRENT_SOURCE_DIR}/Precompiled.cpp)
-		
-		IF(MSVC)
-		    SET(pch_abs ${CMAKE_CURRENT_SOURCE_DIR}/${PRECOMPILED_HEADER})
-		ELSE()
-		    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Precompiled.h ${CMAKE_CURRENT_BINARY_DIR}/Precompiled.h)
-		    SET(pch_abs ${CMAKE_CURRENT_BINARY_DIR}/${PRECOMPILED_HEADER})
-		ENDIF()
+		set(pch_unity ${CMAKE_CURRENT_SOURCE_DIR}/${pch_basename}.cpp)
 		
 		IF (PHASE EQUAL 2)
 			# A list of exclusions patterns. For the moment is global to the entire project
@@ -26,12 +19,12 @@ FUNCTION(ENABLE_PRECOMPILED_HEADERS PHASE TARGET_NAME PRECOMPILED_HEADER SOURCE_
 			IF(CMAKE_COMPILER_IS_GNUCXX)
 				
 				# PCH output file
-				#SET(pch_output "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.gch")
-				SET(pch_output "${pch_abs}.gch")
+				SET(pch_output "${CMAKE_CURRENT_BINARY_DIR}/${PRECOMPILED_HEADER}.gch")
 				
 				# Detects compiler flags
 				STRING(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" _flags_var_name)
 				SET(_compiler_FLAGS ${${_flags_var_name}})
+				LIST(APPEND _compiler_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}")
 				
 				# Directory properties
 				GET_DIRECTORY_PROPERTY(_directory_flags INCLUDE_DIRECTORIES)
@@ -108,7 +101,7 @@ FUNCTION(ENABLE_PRECOMPILED_HEADERS PHASE TARGET_NAME PRECOMPILED_HEADER SOURCE_
 						  set_source_files_properties( ${source_file} PROPERTIES COMPILE_FLAGS "/Yu\"${PRECOMPILED_HEADER}\" /FI\"${PRECOMPILED_HEADER}\""     )
 						ENDIF()
 						IF (CMAKE_COMPILER_IS_GNUCXX)
-						  SET_SOURCE_FILES_PROPERTIES( ${source_file} PROPERTIES COMPILE_FLAGS "-include ${pch_abs} -Winvalid-pch")
+						  SET_SOURCE_FILES_PROPERTIES( ${source_file} PROPERTIES COMPILE_FLAGS "-include ${PRECOMPILED_HEADER} -Winvalid-pch")
 						ENDIF()
 						
 					ENDIF()
