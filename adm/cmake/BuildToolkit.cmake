@@ -37,8 +37,6 @@ FUNCTION(ENABLE_PRECOMPILED_HEADERS PHASE TARGET_NAME PRECOMPILED_HEADER SOURCE_
 				    LIST(APPEND _compiler_FLAGS ${target_compiler_FLAGS})
 				ENDIF()
 							
-				STRING(TOUPPER "COMPILE_DEFINITIONS_${CMAKE_BUILD_TYPE}" _defs_prop_name)
-				
 				GET_DIRECTORY_PROPERTY(_directory_flags COMPILE_DEFINITIONS)
 				IF(_directory_flags)
 				      FOREACH(flag ${_directory_flags})
@@ -46,6 +44,7 @@ FUNCTION(ENABLE_PRECOMPILED_HEADERS PHASE TARGET_NAME PRECOMPILED_HEADER SOURCE_
 				      ENDFOREACH(flag)
 				ENDIF(_directory_flags)
 				
+				STRING(TOUPPER "COMPILE_DEFINITIONS_${CMAKE_BUILD_TYPE}" _defs_prop_name)
 				GET_DIRECTORY_PROPERTY(_directory_flags ${_defs_prop_name})
 				IF(_directory_flags)
 				      FOREACH(flag ${_directory_flags})
@@ -67,13 +66,16 @@ FUNCTION(ENABLE_PRECOMPILED_HEADERS PHASE TARGET_NAME PRECOMPILED_HEADER SOURCE_
 					ENDFOREACH(flag)
 				ENDIF(_target_flags)
 				
+				GET_TARGET_PROPERTY(_target_type ${TARGET_NAME} TYPE)
+				IF(${_target_type} STREQUAL SHARED_LIBRARY)
+					LIST(APPEND _compiler_FLAGS -fPIC)
+				ENDIF()
+
 				#MESSAGE("compiler flags :" ${_compiler_FLAGS})
 
 				SEPARATE_ARGUMENTS(_compiler_FLAGS)
 				
-				IF(NOT WIN32)
-					SET(additionalCompilerFlags -fPIC)
-				ELSE()
+				IF(WIN32)
 					SET(additionalCompilerFlags -mthreads)
 				ENDIF()	      
 					      
@@ -82,7 +84,7 @@ FUNCTION(ENABLE_PRECOMPILED_HEADERS PHASE TARGET_NAME PRECOMPILED_HEADER SOURCE_
 				    DEPENDS ${pch_unity} )
 				ADD_CUSTOM_TARGET(${TARGET_NAME}_gch DEPENDS ${pch_output})
 				ADD_DEPENDENCIES(${TARGET_NAME} ${TARGET_NAME}_gch)
-			ENDIF()
+			ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 	    
 			# Update properties of source files to use the precompiled header.
 			# Additionally, force the inclusion of the precompiled header at beginning of each source file.
