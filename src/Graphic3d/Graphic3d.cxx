@@ -38,7 +38,11 @@ Handle(Graphic3d_GraphicDriver) Graphic3d::InitGraphicDriver (const Handle(Aspec
 
   // Setting the library name. Depends on the platform.
 #if defined(_WIN32) || defined(__WIN32__)
-  aGraphicLibName = "TKOpenGl.dll";
+ #ifndef _DEBUG
+   aGraphicLibName = "TKOpenGl.dll";
+ #else
+   aGraphicLibName = "TKOpenGld.dll";
+ #endif
 #elif defined(__hpux) || defined(HPUX)
   aGraphicLibName = "libTKOpenGl.sl";
 #elif defined(__APPLE__)
