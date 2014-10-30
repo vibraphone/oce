@@ -863,7 +863,7 @@ endif(OCE_EXTRA_WARNINGS)
 
 if(OCE_MULTITHREADED_BUILD)
    if(MSVC)
-      add_definitions("/MP")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
    endif()
 endif()
 
